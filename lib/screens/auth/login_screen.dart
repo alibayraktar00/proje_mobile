@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/auth_service.dart';
 import 'register_screen.dart';
 import '../home/main_navigation_screen.dart';
 
@@ -75,7 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'GYMBUDDY',
+                  'GYM BUDDY',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,

@@ -9,9 +9,6 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-
-  
   // Initialize Firebase
   bool firebaseInitialized = false;
   try {
