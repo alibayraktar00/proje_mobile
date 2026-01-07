@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileTab extends StatefulWidget {
-  const ProfileTab({Key? key}) : super(key: key);
+  const ProfileTab({super.key});
 
   @override
   State<ProfileTab> createState() => _ProfileTabState();
@@ -27,7 +27,7 @@ class _ProfileTabState extends State<ProfileTab> {
     _loadUserData();
   }
 
-  // --- VERİLERİ ÇEKME ---
+  // --- take data ---
   Future<void> _loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -37,7 +37,6 @@ class _ProfileTabState extends State<ProfileTab> {
         setState(() {
           _nameController.text = data['name'] ?? '';
           _surnameController.text = data['surname'] ?? '';
-          // Veritabanından sayı gelebilir, yazıya çevirip gösteriyoruz:
           _ageController.text = (data['age'] ?? '').toString();
           _heightController.text = (data['height'] ?? '').toString();
           _weightController.text = (data['weight'] ?? '').toString();
@@ -46,14 +45,12 @@ class _ProfileTabState extends State<ProfileTab> {
     }
   }
 
-  // --- VERİLERİ KAYDETME (DÜZELTİLEN KISIM) ---
   Future<void> _saveUserData() async {
     setState(() { _isLoading = true; });
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
-      // Yazıyı Sayıya Çeviriyoruz (Parse)
       int age = int.tryParse(_ageController.text) ?? 0;
       double height = double.tryParse(_heightController.text) ?? 0.0;
       double weight = double.tryParse(_weightController.text) ?? 0.0;
@@ -61,9 +58,9 @@ class _ProfileTabState extends State<ProfileTab> {
       Map<String, dynamic> userData = {
         'name': _nameController.text,
         'surname': _surnameController.text,
-        'age': age,       // Artık Sayı olarak gidiyor
-        'height': height, // Artık Sayı olarak gidiyor
-        'weight': weight, // Artık Sayı olarak gidiyor
+        'age': age,
+        'height': height,
+        'weight': weight,
       };
 
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set(
@@ -79,7 +76,7 @@ class _ProfileTabState extends State<ProfileTab> {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Hata: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
     } finally {
       setState(() { _isLoading = false; });
     }
@@ -106,7 +103,7 @@ class _ProfileTabState extends State<ProfileTab> {
           : SingleChildScrollView(
         child: Column(
           children: [
-            // --- HEADER KISMI ---
+            // --- HEADER PART ---
             Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
@@ -175,7 +172,6 @@ class _ProfileTabState extends State<ProfileTab> {
             ),
             const SizedBox(height: 70),
 
-            // --- FORM ALANI ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -185,7 +181,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10)],
+                      boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 10)],
                     ),
                     child: Column(
                       children: [
@@ -247,7 +243,7 @@ class _ProfileTabState extends State<ProfileTab> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 8)],
+        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8)],
       ),
       child: Column(
         children: [

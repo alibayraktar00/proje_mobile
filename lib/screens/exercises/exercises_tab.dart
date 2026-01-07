@@ -279,7 +279,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                     decoration: BoxDecoration(
                       color: const Color(0xFF11182F),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.cyanAccent.withOpacity(0.3)),
+                      border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.3)),
                     ),
                     child: TextField(
                       controller: _searchController,
@@ -330,7 +330,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                   ),
                   selectedColor: Colors.cyanAccent,
                   backgroundColor: const Color(0xFF11182F),
-                  side: BorderSide(color: Colors.cyanAccent.withOpacity(0.4)),
+                  side: BorderSide(color: Colors.cyanAccent.withValues(alpha: 0.4)),
                 );
               },
             ),
@@ -366,7 +366,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
 
     final data = _filteredExercises;
     if (data.isEmpty) {
-      return const Center(child: Text("Gösterilecek egzersiz bulunamadı.", style: TextStyle(color: Colors.white70)));
+      return const Center(child: Text("No exercises were found to display.", style: TextStyle(color: Colors.white70)));
     }
 
     return RefreshIndicator(

@@ -136,7 +136,7 @@ class _SupplementsTabState extends State<SupplementsTab> {
                   elevation: 2,
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: Colors.purple.withOpacity(0.2),
+                      backgroundColor: Colors.purple.withValues(alpha: 0.2),
                       child: const Icon(Icons.medication, color: Colors.purple),
                     ),
                     title: Text(
@@ -159,12 +159,12 @@ class _SupplementsTabState extends State<SupplementsTab> {
                           children: [
                             Chip(
                               label: Text(supplement.category),
-                              backgroundColor: Colors.purple.withOpacity(0.2),
+                              backgroundColor: Colors.purple.withValues(alpha: 0.2),
                             ),
                             if (supplement.timing != null)
                               Chip(
                                 label: Text(supplement.timing!),
-                                backgroundColor: Colors.blue.withOpacity(0.2),
+                                backgroundColor: Colors.blue.withValues(alpha: 0.2),
                               ),
                           ],
                         ),

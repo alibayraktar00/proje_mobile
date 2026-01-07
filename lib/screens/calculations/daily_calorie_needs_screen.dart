@@ -97,7 +97,7 @@ class _DailyCalorieNeedsScreenState extends State<DailyCalorieNeedsScreen> {
                     ),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
-                      BoxShadow(color: Colors.purple.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 5)),
+                      BoxShadow(color: Colors.purple.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 5)),
                     ],
                   ),
                   child: Column(
