@@ -67,212 +67,265 @@ class _CalorieEstimationScreenState extends State<CalorieEstimationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Colors.orange;
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Calorie Estimation'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: isDark ? Colors.white : Colors.black,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Estimated Calories Burned',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDark 
+              ? [Colors.grey[900]!, Colors.black]
+              : [Colors.orange.shade50, Colors.white],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Result Card
+                Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.orange.withValues(alpha: 0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _estimatedCalories?.toStringAsFixed(1) ?? '0.0',
-                      style: const TextStyle(
-                        fontSize: 64,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
-                    ),
-                    const Text(
-                      'kcal',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Activity Parameters',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _activityType,
-                      decoration: const InputDecoration(
-                        labelText: 'Activity Type',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'running', child: Text('Running')),
-                        DropdownMenuItem(value: 'walking', child: Text('Walking')),
-                        DropdownMenuItem(value: 'cycling', child: Text('Cycling')),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _activityType = value ?? 'running';
-                          _estimateCalories();
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Duration: $_durationMinutes minutes',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    Slider(
-                      value: _durationMinutes.toDouble(),
-                      min: 5,
-                      max: 180,
-                      divisions: 35,
-                      label: '$_durationMinutes minutes',
-                      onChanged: (value) {
-                        setState(() {
-                          _durationMinutes = value.toInt();
-                          _estimateCalories();
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Speed: ${_speed.toStringAsFixed(1)} km/h',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    Slider(
-                      value: _speed,
-                      min: 1.0,
-                      max: 20.0,
-                      divisions: 190,
-                      label: '${_speed.toStringAsFixed(1)} km/h',
-                      onChanged: (value) {
-                        setState(() {
-                          _speed = value;
-                          _estimateCalories();
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Incline: ${_incline.toStringAsFixed(1)}%',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    Slider(
-                      value: _incline,
-                      min: 0.0,
-                      max: 15.0,
-                      divisions: 150,
-                      label: '${_incline.toStringAsFixed(1)}%',
-                      onChanged: (value) {
-                        setState(() {
-                          _incline = value;
-                          _estimateCalories();
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (_bmr != null && _dailyCalorieNeeds != null) ...[
-              const SizedBox(height: 24),
-              Card(
-                elevation: 2,
-                color: Colors.blue.withOpacity(0.1),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                    ],
+                  ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Your Metabolic Information',
+                        'Estimated Burn',
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('BMR (Basal Metabolic Rate):'),
-                          Text(
-                            '${_bmr!.toStringAsFixed(1)} kcal/day',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                      const SizedBox(height: 10),
+                      Text(
+                        _estimatedCalories?.toStringAsFixed(0) ?? '0',
+                        style: const TextStyle(
+                          fontSize: 80,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1,
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Daily Calorie Needs:'),
-                          Text(
-                            '${_dailyCalorieNeeds!.toStringAsFixed(1)} kcal/day',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                      const Text(
+                        'kcal',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
-            const SizedBox(height: 24),
-            Card(
-              elevation: 2,
-              color: Colors.green.withOpacity(0.1),
-              child: const Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'How it works:',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+
+                const SizedBox(height: 32),
+
+                // Controls Section
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
                       ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Calorie estimation uses MET (Metabolic Equivalent of Task) values adjusted for your weight, speed, incline, and activity duration. The calculation accounts for your personal metrics to provide accurate estimates.',
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Activity Settings',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // Type Dropdown (Styled)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey[800] : Colors.grey[100],
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            key: ValueKey(_activityType),
+                            value: _activityType,
+                            isExpanded: true,
+                            icon: const Icon(Icons.keyboard_arrow_down, color: Colors.orange),
+                            items: const [
+                              DropdownMenuItem(value: 'running', child: Text('Running 🏃')),
+                              DropdownMenuItem(value: 'walking', child: Text('Walking 🚶')),
+                              DropdownMenuItem(value: 'cycling', child: Text('Cycling 🚴')),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _activityType = value ?? 'running';
+                                _estimateCalories();
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+                      
+                      // Duration Slider
+                      _buildModernSlider(
+                        label: 'Duration',
+                        value: _durationMinutes.toDouble(),
+                        unit: 'min',
+                        min: 5,
+                        max: 180,
+                        color: Colors.blue,
+                        onChanged: (val) {
+                          setState(() {
+                            _durationMinutes = val.toInt();
+                            _estimateCalories();
+                          });
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Speed Slider
+                      _buildModernSlider(
+                        label: 'Speed',
+                        value: _speed,
+                        unit: 'km/h',
+                        min: 1,
+                        max: 20,
+                        color: Colors.green,
+                        onChanged: (val) {
+                          setState(() {
+                            _speed = val;
+                            _estimateCalories();
+                          });
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Incline Slider
+                      _buildModernSlider(
+                        label: 'Incline',
+                        value: _incline,
+                        unit: '%',
+                        min: 0,
+                        max: 15,
+                        color: Colors.purple,
+                        onChanged: (val) {
+                          setState(() {
+                            _incline = val;
+                            _estimateCalories();
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+
+                if (_bmr != null) ...[
+                  const SizedBox(height: 24),
+                  _buildQuickStat('Basal Metabolic Rate (BMR)', '${_bmr!.toStringAsFixed(0)} kcal/day', Colors.teal),
+                ],
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
+
+  Widget _buildModernSlider({
+    required String label,
+    required double value,
+    required String unit,
+    required double min,
+    required double max,
+    required Color color,
+    required Function(double) onChanged,
+  }) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+            Text(
+              '${value.toStringAsFixed(1)} $unit', 
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color),
+            ),
+          ],
+        ),
+        SliderTheme(
+          data: SliderThemeData(
+            activeTrackColor: color,
+            inactiveTrackColor: color.withValues(alpha: 0.2),
+            thumbColor: color,
+            overlayColor: color.withValues(alpha: 0.2),
+            trackHeight: 6,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+          ),
+          child: Slider(
+            value: value,
+            min: min,
+            max: max,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickStat(String title, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: TextStyle(fontWeight: FontWeight.w500, color: color)),
+          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: color)),
+        ],
+      ),
+    );
+  }
 }
+
 

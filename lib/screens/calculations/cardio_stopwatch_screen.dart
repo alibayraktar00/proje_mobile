@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/user_model.dart';
-import '../../models/workout_session_model.dart';
+
 import '../../providers/workout_provider.dart';
 import '../../services/calculation_service.dart';
 
@@ -21,7 +21,7 @@ class _CardioStopwatchScreenState
   Timer? _timer;
   Duration _duration = Duration.zero;
   bool _isRunning = false;
-  DateTime? _startTime;
+
   double _speed = 8.0; // km/h
   double _incline = 0.0; // percentage
   String _activityType = 'running';
@@ -34,7 +34,7 @@ class _CardioStopwatchScreenState
 
   void _startTimer() {
     if (!_isRunning) {
-      _startTime = DateTime.now();
+
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         setState(() {
           _duration = Duration(seconds: _duration.inSeconds + 1);
@@ -54,7 +54,7 @@ class _CardioStopwatchScreenState
     setState(() {
       _duration = Duration.zero;
       _isRunning = false;
-      _startTime = null;
+
     });
   }
 
@@ -74,21 +74,19 @@ class _CardioStopwatchScreenState
       activityType: _activityType,
     );
 
+    /* 
+    // Legacy Session Model
     final session = WorkoutSessionModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      startTime: _startTime ?? DateTime.now(),
-      endTime: DateTime.now(),
-      duration: _duration,
-      caloriesBurned: caloriesBurned,
-      exerciseType: 'cardio',
-      metadata: {
-        'speed': _speed,
-        'incline': _incline,
-        'activityType': _activityType,
-      },
+      key: ...
     );
+    */
 
-    ref.read(workoutSessionsProvider.notifier).addWorkoutSession(session);
+    ref.read(workoutProvider.notifier).addCardioLog(
+      _activityType,
+      _duration,
+      caloriesBurned,
+      _speed
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -122,184 +120,299 @@ class _CardioStopwatchScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Cardio Stopwatch'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: isDark ? Colors.white : Colors.black,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Time',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey,
-                      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDark 
+              ? [Colors.grey[900]!, Colors.black]
+              : [Colors.green.shade50, Colors.white],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Timer Card
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: (_isRunning ? Colors.green : Colors.grey).withValues(alpha: 0.2),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                      )
+                    ],
+                    gradient: LinearGradient(
+                      colors: isDark 
+                          ? [Colors.grey[800]!, Colors.grey[900]!]
+                          : [Colors.white, Colors.grey[50]!],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _formatDuration(_duration),
-                      style: const TextStyle(
-                        fontSize: 64,
-                        fontWeight: FontWeight.bold,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.timer_outlined, 
+                        size: 32, 
+                        color: _isRunning ? Colors.green : Colors.grey,
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: _isRunning ? _stopTimer : _startTimer,
-                          icon: Icon(_isRunning ? Icons.pause : Icons.play_arrow),
-                          label: Text(_isRunning ? 'Stop' : 'Start'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            backgroundColor: _isRunning ? Colors.orange : Colors.green,
-                          ),
+                      const SizedBox(height: 10),
+                      Text(
+                        _formatDuration(_duration),
+                        style: TextStyle(
+                          fontSize: 56,
+                          fontWeight: FontWeight.bold,
+                          color: _isRunning ? Colors.green : (isDark ? Colors.white : Colors.black87),
+                          fontFamily: 'monospace',
                         ),
-                        const SizedBox(width: 16),
-                        ElevatedButton.icon(
-                          onPressed: _resetTimer,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Reset'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        _isRunning ? 'ACTIVE' : 'PAUSED',
+                        style: TextStyle(
+                          color: _isRunning ? Colors.green : Colors.grey,
+                          letterSpacing: 2,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+
+                const SizedBox(height: 40),
+
+                // Controls
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Estimated Calories Burned',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
+                     // Save Button (Mini)
+                    _buildCircularControl(
+                      icon: Icons.save,
+                      color: Colors.blue,
+                      size: 50,
+                      onTap: _saveWorkout,
+                      label: "Save",
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _getCaloriesBurned().toStringAsFixed(1),
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
+                    const SizedBox(width: 30),
+
+                    // Play/Pause (Main)
+                    _buildCircularControl(
+                      icon: _isRunning ? Icons.pause : Icons.play_arrow,
+                      color: _isRunning ? Colors.orange : Colors.green,
+                      size: 80,
+                      onTap: _isRunning ? _stopTimer : _startTimer,
+                      isMain: true,
                     ),
-                    const Text(
-                      'kcal',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Activity Settings',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _activityType,
-                      decoration: const InputDecoration(
-                        labelText: 'Activity Type',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'running', child: Text('Running')),
-                        DropdownMenuItem(value: 'walking', child: Text('Walking')),
-                        DropdownMenuItem(value: 'cycling', child: Text('Cycling')),
-                      ],
-                      onChanged: (value) {
-                        setState(() => _activityType = value ?? 'running');
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Speed: ${_speed.toStringAsFixed(1)} km/h',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    Slider(
-                      value: _speed,
-                      min: 1.0,
-                      max: 20.0,
-                      divisions: 190,
-                      label: '${_speed.toStringAsFixed(1)} km/h',
-                      onChanged: (value) {
-                        setState(() => _speed = value);
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Incline: ${_incline.toStringAsFixed(1)}%',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    Slider(
-                      value: _incline,
-                      min: 0.0,
-                      max: 15.0,
-                      divisions: 150,
-                      label: '${_incline.toStringAsFixed(1)}%',
-                      onChanged: (value) {
-                        setState(() => _incline = value);
-                      },
+                    const SizedBox(width: 30),
+
+                    // Reset Button (Mini)
+                    _buildCircularControl(
+                      icon: Icons.refresh,
+                      color: Colors.red,
+                      size: 50,
+                      onTap: _resetTimer,
+                      label: "Reset",
                     ),
                   ],
                 ),
-              ),
+
+                const SizedBox(height: 40),
+
+                // Stats & Settings
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Calories
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Calories', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                              Text('Burned', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                _getCaloriesBurned().toStringAsFixed(1),
+                                style: const TextStyle(
+                                  fontSize: 32, 
+                                  fontWeight: FontWeight.bold, 
+                                  color: Colors.orange
+                                ),
+                              ),
+                              const Text('kcal', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 30),
+                      
+                      // Type Selection
+                      DropdownButtonFormField<String>(
+                        key: ValueKey(_activityType),
+                        value: _activityType,
+                        decoration: const InputDecoration(
+                          labelText: 'Activity Type',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                          prefixIcon: Icon(Icons.fitness_center, color: Colors.green),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'running', child: Text('Running 🏃')),
+                          DropdownMenuItem(value: 'walking', child: Text('Walking 🚶')),
+                          DropdownMenuItem(value: 'cycling', child: Text('Cycling 🚴')),
+                        ],
+                        onChanged: (value) {
+                          setState(() => _activityType = value ?? 'running');
+                        },
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Speed Slider
+                      _buildSimpleSlider(
+                        label: 'Speed', 
+                        value: _speed, 
+                        unit: 'km/h', 
+                        min: 1, 
+                        max: 20, 
+                        color: Colors.blue,
+                        onChanged: (v) => setState(() => _speed = v),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // Incline Slider
+                      _buildSimpleSlider(
+                        label: 'Incline', 
+                        value: _incline, 
+                        unit: '%', 
+                        min: 0, 
+                        max: 15, 
+                        color: Colors.purple,
+                        onChanged: (v) => setState(() => _incline = v),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _saveWorkout,
-              icon: const Icon(Icons.save),
-              label: const Text('Save Workout'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.blue,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
+
+  Widget _buildCircularControl({
+    required IconData icon,
+    required Color color,
+    required double size,
+    required VoidCallback onTap,
+    bool isMain = false,
+    String? label,
+  }) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(size / 2),
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isMain ? color : color.withValues(alpha: 0.1),
+              boxShadow: isMain ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.4),
+                  blurRadius: 15,
+                  spreadRadius: 2,
+                )
+              ] : null,
+              border: isMain ? null : Border.all(color: color, width: 2),
+            ),
+            child: Icon(
+              icon,
+              size: size * 0.5,
+              color: isMain ? Colors.white : color,
+            ),
+          ),
+        ),
+        if (label != null) ...[
+          const SizedBox(height: 8),
+          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+        ]
+      ],
+    );
+  }
+
+  Widget _buildSimpleSlider({
+    required String label,
+    required double value,
+    required String unit,
+    required double min,
+    required double max,
+    required Color color,
+    required Function(double) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+            Text('${value.toStringAsFixed(1)} $unit', style: TextStyle(fontWeight: FontWeight.bold, color: color)),
+          ],
+        ),
+        SliderTheme(
+          data: SliderThemeData(
+            activeTrackColor: color,
+            thumbColor: color,
+            inactiveTrackColor: color.withValues(alpha: 0.2),
+          ),
+          child: Slider(
+            value: value,
+            min: min,
+            max: max,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
 }
+
 

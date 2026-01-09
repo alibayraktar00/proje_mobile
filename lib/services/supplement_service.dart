@@ -1,16 +1,18 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../models/supplement_model.dart';
 
 class SupplementService {
   static List<SupplementModel> getSupplementsByCategory(String category) {
     return _allSupplements
-        .where((supp) => supp.category.toLowerCase() == category.toLowerCase())
+        .where((s) => s.category.toLowerCase() == category.toLowerCase())
         .toList();
   }
 
   static List<SupplementModel> getSupplementsByGoal(String goal) {
     return _allSupplements
-        .where((supp) =>
-            supp.targetGoals?.any((g) => g.toLowerCase() == goal.toLowerCase()) ??
+        .where((s) =>
+            s.targetGoals?.any((g) => g.toLowerCase() == goal.toLowerCase()) ??
             false)
         .toList();
   }
@@ -19,127 +21,159 @@ class SupplementService {
     return _allSupplements;
   }
 
+  // --- API Integration ---
+
+  static Future<List<dynamic>> searchProducts(String query) async {
+    if (query.isEmpty) return [];
+    
+    // Using Open Food Facts API v2
+    final url = Uri.parse(
+      'https://world.openfoodfacts.org/api/v2/search?categories_tags_en=dietary-supplements&search_terms=$query&fields=code,product_name,brands,image_url,nutriments&page_size=30'
+    );
+
+    try {
+      final response = await http.get(
+        url, 
+        headers: {
+          'User-Agent': 'GymBuddy/1.0 (gymbuddy@example.com) - Android App',
+          'Accept': 'application/json',
+        }
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['products'] != null) {
+          return data['products'];
+        }
+      }
+    } catch (e) {
+      print("API Error: $e");
+    }
+    return [];
+  }
+
+  // --- Static Data ---
+
   static final List<SupplementModel> _allSupplements = [
     SupplementModel(
-      id: 'supp_1',
+      id: '1',
       name: 'Whey Protein',
-      description: 'Fast-digesting protein powder ideal for post-workout recovery',
-      category: 'post-workout',
+      description: 'Fast-absorbing protein derived from milk. Essential for muscle repair and growth.',
+      category: 'Protein',
       benefits: [
-        'Promotes muscle recovery',
-        'High in essential amino acids',
-        'Quick absorption',
-        'Supports muscle growth',
+        'Increases muscle mass and strength',
+        'Improves recovery after workouts',
+        'Reduces appetite and hunger levels'
       ],
-      dosage: '20-30g per serving',
-      timing: 'after workout',
-      targetGoals: ['muscle gain', 'recovery', 'strength'],
+      dosage: '20-25g post-workout',
+      timing: 'Immediately after training or between meals',
+      assetPath: 'assets/images/supp_whey.png',
+      targetGoals: ['Build Muscle', 'Recovery', 'Lose Fat'],
     ),
     SupplementModel(
-      id: 'supp_2',
+      id: '2',
       name: 'Creatine Monohydrate',
-      description: 'Most researched supplement for strength and power output',
-      category: 'daily',
+      description: 'Most researched supplement for strength and power output. Increases phosphocreatine stores in muscles.',
+      category: 'Performance',
       benefits: [
-        'Increases strength',
-        'Improves power output',
-        'Enhances muscle mass',
-        'Supports high-intensity training',
+        'Increases strength and power output',
+        'Improves high-intensity exercise performance',
+        'Enhances recovery and muscle volume'
       ],
       dosage: '3-5g daily',
-      timing: 'any time of day',
-      targetGoals: ['muscle gain', 'strength', 'power'],
+      timing: 'Any time of day, consistently',
+      assetPath: 'assets/images/supp_creatine.png',
+      targetGoals: ['Build Muscle', 'Strength', 'Performance'],
     ),
     SupplementModel(
-      id: 'supp_3',
-      name: 'Pre-Workout',
-      description: 'Energy and performance enhancing supplement',
-      category: 'pre-workout',
+      id: '3',
+      name: 'Pre-Workout (Caffeine)',
+      description: 'Energy and performance enhancing supplement usually containing caffeine, beta-alanine, and citrulline.',
+      category: 'Energy',
       benefits: [
-        'Increases energy',
-        'Improves focus',
-        'Enhances endurance',
-        'Boosts workout performance',
+        'Increases energy and focus',
+        'Improves endurance and performance',
+        'Reduces perceived exertion'
       ],
-      dosage: '1 scoop 30 minutes before workout',
-      timing: 'before workout',
-      targetGoals: ['endurance', 'performance', 'energy'],
+      dosage: '1 serving (check label for specific ingredients)',
+      timing: '20-30 minutes before workout',
+      assetPath: 'assets/images/supp_preworkout.png',
+      targetGoals: ['Energy', 'Focus', 'Performance'],
     ),
     SupplementModel(
-      id: 'supp_4',
-      name: 'BCAA (Branched-Chain Amino Acids)',
-      description: 'Essential amino acids for muscle preservation and recovery',
-      category: 'during-workout',
+      id: '4',
+      name: 'BCAAs',
+      description: 'Branched-Chain Amino Acids (Leucine, Isoleucine, Valine).',
+      category: 'Recovery',
       benefits: [
-        'Reduces muscle fatigue',
+        'Reduces muscle soreness',
         'Prevents muscle breakdown',
-        'Speeds recovery',
-        'Improves endurance',
+        'Reduces fatigue during exercise'
       ],
       dosage: '5-10g during or after workout',
-      timing: 'during or after workout',
-      targetGoals: ['recovery', 'endurance', 'muscle preservation'],
+      timing: 'Intra-workout or Post-workout',
+      assetPath: 'assets/images/supp_bcaa.png',
+      targetGoals: ['Recovery', 'Endurance'],
     ),
     SupplementModel(
-      id: 'supp_5',
-      name: 'Omega-3 Fish Oil',
-      description: 'Essential fatty acids for overall health and inflammation reduction',
-      category: 'daily',
-      benefits: [
-        'Reduces inflammation',
-        'Supports heart health',
-        'Improves joint health',
-        'Enhances brain function',
-      ],
-      dosage: '1-2g daily',
-      timing: 'with meals',
-      targetGoals: ['recovery', 'health', 'inflammation'],
-    ),
-    SupplementModel(
-      id: 'supp_6',
-      name: 'Vitamin D3',
-      description: 'Essential vitamin for bone health and immune function',
-      category: 'daily',
-      benefits: [
-        'Supports bone health',
-        'Boosts immune system',
-        'Improves mood',
-        'Enhances muscle function',
-      ],
-      dosage: '1000-2000 IU daily',
-      timing: 'morning with food',
-      targetGoals: ['health', 'immune support', 'bone health'],
-    ),
-    SupplementModel(
-      id: 'supp_7',
+      id: '5',
       name: 'Casein Protein',
-      description: 'Slow-digesting protein ideal for nighttime recovery',
-      category: 'daily',
+      description: 'Slow-digesting protein derived from milk.',
+      category: 'Protein',
       benefits: [
-        'Slow release protein',
-        'Prevents muscle breakdown',
-        'Supports overnight recovery',
-        'Promotes satiety',
+        'Provides sustained release of amino acids',
+        'Prevents muscle breakdown during sleep',
+        'Promotes satiety'
       ],
-      dosage: '20-40g before bed',
-      timing: 'before bed',
-      targetGoals: ['muscle gain', 'recovery', 'muscle preservation'],
+      dosage: '20-30g before bed',
+      timing: 'Before sleep',
+      assetPath: 'assets/images/supp_casein.png',
+      targetGoals: ['Build Muscle', 'Recovery'],
     ),
     SupplementModel(
-      id: 'supp_8',
-      name: 'Beta-Alanine',
-      description: 'Amino acid that buffers acid in muscles during high-intensity exercise',
-      category: 'pre-workout',
+      id: '6',
+      name: 'Multivitamin',
+      description: 'Blend of essential vitamins and minerals.',
+      category: 'General Health',
       benefits: [
-        'Increases endurance',
+        'Fills nutritional gaps',
+        'Supports overall health and immunity',
+        'Improves natural energy levels'
+      ],
+      dosage: '1 serving daily',
+      timing: 'With breakfast',
+      assetPath: 'assets/images/supp_multivitamin.png',
+      targetGoals: ['Health', 'Wellness'],
+    ),
+    SupplementModel(
+      id: '7',
+      name: 'Omega-3 Fish Oil',
+      description: 'Essential fatty acids EPA and DHA.',
+      category: 'General Health',
+      benefits: [
+        'Supports heart and brain health',
+        'Reduces inflammation',
+        'Supports joint health'
+      ],
+      dosage: '1-2g EPA/DHA daily',
+      timing: 'With meals',
+      assetPath: 'assets/images/supp_omega3.png',
+      targetGoals: ['Health', 'Joints', 'Recovery'],
+    ),
+    SupplementModel(
+      id: '8',
+      name: 'Beta-Alanine',
+      description: 'Amino acid that buffers acid in muscles.',
+      category: 'Performance',
+      benefits: [
         'Delays muscle fatigue',
-        'Improves high-intensity performance',
-        'Enhances workout capacity',
+        'Improves endurance in 1-4 min range',
+        'Increases training volume'
       ],
       dosage: '2-5g daily',
-      timing: 'before workout',
-      targetGoals: ['endurance', 'performance', 'high-intensity training'],
+      timing: 'Pre-workout',
+      assetPath: 'assets/images/supp_betaalanine.png',
+      targetGoals: ['Endurance', 'Performance'],
     ),
   ];
 }
-

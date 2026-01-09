@@ -6,6 +6,7 @@ class SupplementModel {
   final List<String> benefits;
   final String? dosage;
   final String? timing; // "morning", "before workout", "after workout", etc.
+  final String? assetPath; // Path to local asset image
   final List<String>? targetGoals; // ["muscle gain", "weight loss", "endurance", etc.]
 
   SupplementModel({
@@ -16,6 +17,7 @@ class SupplementModel {
     required this.benefits,
     this.dosage,
     this.timing,
+    this.assetPath,
     this.targetGoals,
   });
 
@@ -28,6 +30,7 @@ class SupplementModel {
       'benefits': benefits,
       'dosage': dosage,
       'timing': timing,
+      'assetPath': assetPath,
       'targetGoals': targetGoals,
     };
   }
@@ -41,10 +44,12 @@ class SupplementModel {
       benefits: List<String>.from(map['benefits'] ?? []),
       dosage: map['dosage'],
       timing: map['timing'],
+      assetPath: map['assetPath'],
       targetGoals: map['targetGoals'] != null
           ? List<String>.from(map['targetGoals'])
           : null,
     );
   }
 }
+
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/exercise_model.dart';
-import '../../providers/task_provider.dart';
+import '../../providers/workout_provider.dart';
 import '../../services/exercise_service.dart';
 import 'exercise_detail_screen.dart';
 
@@ -26,21 +26,21 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
   final List<String> _equipments = ["Tümü", "Barbell", "Dumbbell", "Makine", "Vücut Ağırlığı", "Kablo"];
   final List<String> _difficulties = ["Tümü", "Beginner", "Intermediate", "Advanced"];
 
-  final Map<String, String> _bodyPartMap = {
-    "Göğüs": "chest",
-    "Sırt": "back",
-    "Bacak": "upper legs",
-    "Omuz": "shoulders",
-    "Kol": "upper arms",
-    "Karın": "waist",
-    "Cardio": "cardio",
+  final Map<String, List<String>> _bodyPartMap = {
+    "Göğüs": ["chest"],
+    "Sırt": ["lats", "middle back", "lower back", "traps"],
+    "Bacak": ["quadriceps", "hamstrings", "glutes", "calves", "adductors", "abductors"],
+    "Omuz": ["shoulders", "neck"],
+    "Kol": ["biceps", "triceps", "forearms"],
+    "Karın": ["abdominals"],
+    "Cardio": ["cardio"],
   };
 
   final Map<String, String> _equipmentMap = {
     "Barbell": "barbell",
     "Dumbbell": "dumbbell",
-    "Makine": "leverage machine",
-    "Vücut Ağırlığı": "body weight",
+    "Makine": "machine",
+    "Vücut Ağırlığı": "body only",
     "Kablo": "cable",
   };
 
@@ -70,24 +70,27 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
     });
 
     try {
-      final bodyPart = _bodyPartMap[_selectedCategory];
+      final bodyParts = _bodyPartMap[_selectedCategory];
       final equipment = _equipmentMap[_selectedEquipment];
+      
       final data = await ExerciseService.fetchExercises(
-        bodyPart: bodyPart,
+        bodyParts: bodyParts,
         equipment: equipment,
-        limit: 80,
+        limit: 100,
       );
       setState(() {
         _exercises = data;
       });
     } catch (_) {
       setState(() {
-        _error = "ExerciseDB verisi alınamadı. Lütfen tekrar deneyin.";
+        _error = "Veri alınamadı. İnternet bağlantınızı kontrol edin.";
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -103,54 +106,125 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
   void _showFilterSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0F172A),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text("Filtreler", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                  Icon(Icons.filter_list, color: Colors.cyanAccent),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Filtrele", style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategory = "Tümü";
+                            _selectedEquipment = "Tümü";
+                            _selectedDifficulty = "Tümü";
+                          });
+                          Navigator.pop(context);
+                          _fetchExercises();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        tooltip: "Sıfırla",
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      children: [
+                        _buildFilterSection("Kas Grubu", _categories, _selectedCategory, (val) => setState(() => _selectedCategory = val)),
+                        const SizedBox(height: 24),
+                        _buildFilterSection("Ekipman", _equipments, _selectedEquipment, (val) => setState(() => _selectedEquipment = val)),
+                        const SizedBox(height: 24),
+                        _buildFilterSection("Zorluk", _difficulties, _selectedDifficulty, (val) => setState(() => _selectedDifficulty = val)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.cyanAccent,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _fetchExercises();
+                      },
+                      child: const Text("Filtreyi Uygula", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  )
                 ],
               ),
-              const SizedBox(height: 16),
-              _buildFilterDropdown("Kas Grubu", _selectedCategory, _categories, (val) {
-                setState(() => _selectedCategory = val ?? "Tümü");
-              }),
-              const SizedBox(height: 12),
-              _buildFilterDropdown("Ekipman", _selectedEquipment, _equipments, (val) {
-                setState(() => _selectedEquipment = val ?? "Tümü");
-              }),
-              const SizedBox(height: 12),
-              _buildFilterDropdown("Zorluk", _selectedDifficulty, _difficulties, (val) {
-                setState(() => _selectedDifficulty = val ?? "Tümü");
-              }),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.cyanAccent,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _fetchExercises();
-                  },
-                  child: const Text("Filtreyi Uygula"),
-                ),
-              )
-            ],
-          ),
+            );
+          },
         );
       },
+    );
+  }
+
+  Widget _buildFilterSection(String title, List<String> options, String selected, Function(String) onSelect) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: options.map((option) {
+            final isSelected = option == selected;
+            return ChoiceChip(
+              label: Text(option),
+              selected: isSelected,
+              onSelected: (val) {
+                if (val) onSelect(option);
+              },
+              selectedColor: Colors.cyanAccent,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.black : Theme.of(context).textTheme.bodyMedium?.color,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              backgroundColor: Theme.of(context).cardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: isSelected ? Colors.cyanAccent : Colors.grey.withOpacity(0.2),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -158,14 +232,15 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 20,
-            right: 20,
-            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            left: 24,
+            right: 24,
+            top: 24,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -174,73 +249,111 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
               Row(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     child: exercise.imageUrl != null
                         ? Image.network(
                             exercise.imageUrl!,
-                            width: 70,
-                            height: 70,
+                            width: 80,
+                            height: 80,
                             fit: BoxFit.cover,
-                            errorBuilder: (c, e, s) => Container(
-                              width: 70,
-                              height: 70,
-                              color: Colors.grey.shade800,
-                              child: const Icon(Icons.fitness_center, color: Colors.cyanAccent),
-                            ),
                           )
                         : Container(
-                            width: 70,
-                            height: 70,
-                            color: Colors.grey.shade800,
-                            child: const Icon(Icons.fitness_center, color: Colors.cyanAccent),
+                            width: 80,
+                            height: 80,
+                            color: Colors.grey.withOpacity(0.1),
+                            child: const Icon(Icons.fitness_center),
                           ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(child: Text(exercise.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _setsController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(labelText: "Set", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
-                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: TextField(
-                      controller: _repsController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(labelText: "Tekrar", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          exercise.name,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          exercise.bodyPart.toUpperCase(),
+                          style: TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildNumberInput(_setsController, "Set"),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildNumberInput(_repsController, "Tekrar"),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.cyanAccent, foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                height: 54,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.cyanAccent,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
                   onPressed: () {
-                    final subtitle = "${_setsController.text} x ${_repsController.text}";
-                    ref.read(taskProvider.notifier).addTask(exercise.name, subtitle);
+                    ref.read(workoutProvider.notifier).addLog(
+                      exercise.name, 
+                      _setsController.text, 
+                      _repsController.text
+                    );
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("${exercise.name} eklendi!"), backgroundColor: Colors.green),
+                      SnackBar(
+                        content: Text("${exercise.name} antrenmana eklendi!"),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
                     );
                   },
-                  child: const Text("Listeme Ekle", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  icon: const Icon(Icons.add_task),
+                  label: const Text("Listeme Ekle", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
-              const SizedBox(height: 30),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNumberInput(TextEditingController controller, String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Theme.of(context).cardColor,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          ),
+        ),
+      ],
     );
   }
 
@@ -256,87 +369,114 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1021),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0B1021),
-        elevation: 0,
-        title: const Text("Exercises", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_alt_rounded, color: Colors.cyanAccent),
-            onPressed: _showFilterSheet,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF11182F),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.3)),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: "Search exercises...",
-                        hintStyle: TextStyle(color: Colors.white54),
-                        prefixIcon: Icon(Icons.search, color: Colors.cyanAccent),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      ),
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              expandedHeight: 120,
+              floating: true,
+              pinned: true,
+              elevation: 0,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              flexibleSpace: FlexibleSpaceBar(
+                titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                title: Text(
+                  "Egzersizler",
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.titleLarge?.color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.cyanAccent.withOpacity(0.05),
+                        Theme.of(context).scaffoldBackgroundColor,
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+              ),
+              actions: [
                 IconButton(
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.cyanAccent,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
                   onPressed: _showFilterSheet,
-                  icon: const Icon(Icons.tune),
-                )
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.tune_rounded, size: 20),
+                  ),
+                ),
+                const SizedBox(width: 8),
               ],
             ),
-          ),
-          SizedBox(
-            height: 48,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              scrollDirection: Axis.horizontal,
-              itemCount: _categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final cat = _categories[index];
-                final isSelected = cat == _selectedCategory;
-                return ChoiceChip(
-                  label: Text(cat),
-                  selected: isSelected,
-                  onSelected: (_) {
-                    setState(() => _selectedCategory = cat);
-                    _fetchExercises();
-                  },
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.black : Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  selectedColor: Colors.cyanAccent,
-                  backgroundColor: const Color(0xFF11182F),
-                  side: BorderSide(color: Colors.cyanAccent.withValues(alpha: 0.4)),
-                );
-              },
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: "Egzersiz ara...",
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: Theme.of(context).cardColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Colors.cyanAccent, width: 2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 40,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _categories.length,
+                        separatorBuilder: (context, index) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          final cat = _categories[index];
+                          final isSelected = cat == _selectedCategory;
+                          return ChoiceChip(
+                            label: Text(cat),
+                            selected: isSelected,
+                            onSelected: (_) {
+                              setState(() => _selectedCategory = cat);
+                              _fetchExercises();
+                            },
+                            selectedColor: Colors.cyanAccent,
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.black : Theme.of(context).textTheme.bodyMedium?.color,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            backgroundColor: Theme.of(context).cardColor,
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          Expanded(child: _buildContent()),
-        ],
+          ];
+        },
+        body: _buildContent(),
       ),
     );
   }
@@ -351,13 +491,23 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
-            const SizedBox(height: 12),
+            Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+            const SizedBox(height: 16),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _fetchExercises,
               icon: const Icon(Icons.refresh),
               label: const Text("Tekrar dene"),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.cyanAccent, foregroundColor: Colors.black),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.cyanAccent, 
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
           ],
         ),
@@ -366,7 +516,19 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
 
     final data = _filteredExercises;
     if (data.isEmpty) {
-      return const Center(child: Text("No exercises were found to display.", style: TextStyle(color: Colors.white70)));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 64, color: Colors.grey.withOpacity(0.5)),
+            const SizedBox(height: 16),
+            const Text(
+              "Egzersiz bulunamadı.",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey),
+            ),
+          ],
+        ),
+      );
     }
 
     return RefreshIndicator(
@@ -377,8 +539,8 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 16,
-          crossAxisSpacing: 12,
-          childAspectRatio: 0.78,
+          crossAxisSpacing: 16,
+          childAspectRatio: 0.8,
         ),
         itemCount: data.length,
         itemBuilder: (context, index) {
@@ -388,140 +550,102 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
     );
   }
 
-  Widget _buildFilterDropdown(String label, String value, List<String> items, ValueChanged<String?> onChanged) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFF11182F),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.cyanAccent.withOpacity(0.4)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          dropdownColor: const Color(0xFF0F172A),
-          value: value,
-          isExpanded: true,
-          icon: const Icon(Icons.arrow_drop_down, color: Colors.cyanAccent),
-          style: const TextStyle(fontSize: 14, color: Colors.white),
-          onChanged: onChanged,
-          items: items.map((val) => DropdownMenuItem(value: val, child: Text(val))).toList(),
-        ),
-      ),
-    );
-  }
-
   Widget _buildExerciseCard(BuildContext context, ExerciseModel item) {
-    final difficultyLabel = (item.difficulty ?? "Intermediate").toUpperCase();
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF11182F), Color(0xFF0B1021)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    final difficultyLabel = (item.difficulty ?? "Intermediate");
+    
+    return GestureDetector(
+      onTap: () => _navigateToDetail(context, item),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.cyanAccent.withOpacity(0.35)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.cyanAccent.withOpacity(0.15),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () => _navigateToDetail(context, item),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
+              flex: 3,
               child: Stack(
+                fit: StackFit.expand,
                 children: [
                   Hero(
                     tag: 'exercise-${item.id}',
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                       child: item.imageUrl != null && item.imageUrl!.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: item.imageUrl!,
-                              width: double.infinity,
-                              height: double.infinity,
                               fit: BoxFit.cover,
-                              fadeInDuration: const Duration(milliseconds: 200),
-                              placeholder: (c, _) => Container(
-                                color: const Color(0xFF0B1021),
-                                alignment: Alignment.center,
-                                child: const CircularProgressIndicator(color: Colors.cyanAccent, strokeWidth: 2),
-                              ),
                               errorWidget: (c, e, s) => Container(
-                                color: const Color(0xFF0B1021),
-                                alignment: Alignment.center,
-                                child: const Icon(Icons.broken_image, color: Colors.cyanAccent, size: 36),
+                                color: Colors.grey.withOpacity(0.1),
+                                child: const Icon(Icons.broken_image, color: Colors.grey),
                               ),
                             )
                           : Container(
-                              color: const Color(0xFF0B1021),
-                              alignment: Alignment.center,
-                              child: const Icon(Icons.fitness_center, color: Colors.cyanAccent, size: 36),
+                              color: Colors.grey.withOpacity(0.1),
+                              child: const Icon(Icons.fitness_center, color: Colors.grey),
                             ),
                     ),
                   ),
                   Positioned(
-                    top: 10,
-                    right: 10,
-                    child: InkWell(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
                       onTap: () => _showAddToWorkoutDialog(context, item),
                       child: Container(
-                        width: 34,
-                        height: 34,
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.cyanAccent,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.cyanAccent),
+                          boxShadow: [
+                             BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                            ),
+                          ],
                         ),
-                        child: const Icon(Icons.add, color: Colors.cyanAccent, size: 18),
+                        child: const Icon(Icons.add, size: 20, color: Colors.black),
                       ),
-                    ),
-                  ),
-                  Positioned(
-                    right: 10,
-                    bottom: 10,
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.cyanAccent),
-                      ),
-                      child: const Icon(Icons.play_arrow_rounded, color: Colors.cyanAccent),
                     ),
                   ),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      _chip(item.bodyPart, Colors.cyanAccent),
-                      const SizedBox(width: 6),
-                      _chip(difficultyLabel, Colors.pinkAccent),
-                    ],
-                  ),
-                ],
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      item.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        height: 1.2,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        _buildMiniChip(item.bodyPart, Colors.blue),
+                        const SizedBox(width: 4),
+                        if (difficultyLabel.isNotEmpty)
+                          _buildMiniChip(difficultyLabel, _getDifficultyColor(difficultyLabel)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -530,17 +654,34 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
     );
   }
 
-  Widget _chip(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.5)),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600),
+  Color _getDifficultyColor(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'beginner': return Colors.green;
+      case 'advanced': return Colors.red;
+      default: return Colors.orange;
+    }
+  }
+
+  Widget _buildMiniChip(String text, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: color,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

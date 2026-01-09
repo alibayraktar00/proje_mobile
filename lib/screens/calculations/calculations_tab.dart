@@ -11,10 +11,27 @@ class CalculationsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine if dark mode is active to adjust colors
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Advanced Calculation Hub'),
-        backgroundColor: Colors.orange,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark 
+                  ? [Colors.grey[900]!, Colors.grey[800]!]
+                  : [Colors.orange.shade400, Colors.deepOrange.shade400],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Consumer(
         builder: (context, ref, child) {
@@ -26,136 +43,172 @@ class CalculationsTab extends StatelessWidget {
             );
           }
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // 1. BMI
-              _buildCalculationCard(
-                context,
-                title: 'BMI Calculator',
-                description: 'Calculate your Body Mass Index and get status feedback',
-                icon: Icons.monitor_weight,
-                color: Colors.blue,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BMICalculatorScreen(user: user),
-                    ),
-                  );
-                },
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: isDark
+                    ? [Colors.black, Colors.grey[900]!]
+                    : [Colors.orange.shade50, Colors.white],
               ),
-              const SizedBox(height: 16),
+            ),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 120, 16, 16), // Top padding for transparent AppBar
+              children: [
+                _buildModernCard(
+                  context,
+                  title: 'BMI Calculator',
+                  description: 'Calculate your Body Mass Index and get status feedback',
+                  icon: Icons.monitor_weight_outlined,
+                  gradient: [Colors.blue.shade400, Colors.blue.shade700],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BMICalculatorScreen(user: user),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
 
-              // 2. Stopwatch
-              _buildCalculationCard(
-                context,
-                title: 'Cardio Stopwatch',
-                description: 'Full-featured stopwatch for cardio workouts',
-                icon: Icons.timer,
-                color: Colors.green,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CardioStopwatchScreen(user: user),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
+                _buildModernCard(
+                  context,
+                  title: 'Cardio Stopwatch',
+                  description: 'Full-featured stopwatch for cardio workouts',
+                  icon: Icons.timer_outlined,
+                  gradient: [Colors.green.shade400, Colors.green.shade700],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CardioStopwatchScreen(user: user),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
 
-              // 3. Calorie Estimation (Activity Burn)
-              _buildCalculationCard(
-                context,
-                title: 'Calorie Estimation',
-                description: 'Real-time calorie burn estimation based on activity',
-                icon: Icons.local_fire_department,
-                color: Colors.orange,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CalorieEstimationScreen(user: user),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
+                _buildModernCard(
+                  context,
+                  title: 'Calorie Estimation',
+                  description: 'Real-time calorie burn estimation based on activity',
+                  icon: Icons.local_fire_department_outlined,
+                  gradient: [Colors.orange.shade400, Colors.orange.shade700],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CalorieEstimationScreen(user: user),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
 
-              // 4. NEW BUTTON: Daily Calorie Needs (Intake)
-              _buildCalculationCard(
-                context,
-                title: 'Daily Calorie Needs',
-                description: 'Calculate your daily intake for weight loss or muscle gain',
-                icon: Icons.restaurant_menu, // Farklı bir ikon
-                color: Colors.deepPurple,    // Farklılaşması için Mor renk
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => DailyCalorieNeedsScreen(user: user),
-                    ),
-                  );
-                },
-              ),
-            ],
+                _buildModernCard(
+                  context,
+                  title: 'Daily Calorie Needs',
+                  description: 'Calculate your daily intake for weight loss or muscle gain',
+                  icon: Icons.restaurant_menu,
+                  gradient: [Colors.purple.shade400, Colors.purple.shade700],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DailyCalorieNeedsScreen(user: user),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _buildCalculationCard(
+  Widget _buildModernCard(
       BuildContext context, {
         required String title,
         required String description,
         required IconData icon,
-        required Color color,
+        required List<Color> gradient,
         required VoidCallback onTap,
       }) {
-    return Card(
-      elevation: 4,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, size: 40, color: color),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: gradient.first.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Ink(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: gradient,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 32, color: Colors.white),
                 ),
-              ),
-              const Icon(Icons.arrow_forward_ios, size: 20),
-            ],
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -6,11 +6,11 @@ class MealModel {
   final double protein; // in grams
   final double carbs; // in grams
   final double fats; // in grams
-  final String? imageUrl;
   final List<String> ingredients;
   final List<String> instructions;
   final String mealType; // "breakfast", "lunch", "dinner", "snack"
-  final String? difficulty;
+  final String difficulty;
+  final String? imageUrl;
 
   MealModel({
     required this.id,
@@ -20,12 +20,46 @@ class MealModel {
     required this.protein,
     required this.carbs,
     required this.fats,
-    this.imageUrl,
     required this.ingredients,
     required this.instructions,
     required this.mealType,
-    this.difficulty,
+    required this.difficulty,
+    this.imageUrl,
   });
+
+  factory MealModel.fromJson(Map<String, dynamic> json) {
+    // Generate random macros since API doesn't provide them
+    // Use hashcode to make it consistent per meal ID
+    final double calories = 300 + (json['idMeal'].toString().hashCode % 400).toDouble();
+    final double protein = 10 + (json['idMeal'].toString().hashCode % 30).toDouble();
+    final double carbs = 20 + (json['idMeal'].toString().hashCode % 50).toDouble();
+    final double fats = 5 + (json['idMeal'].toString().hashCode % 20).toDouble();
+    
+    // Parse ingredients
+    List<String> ingredients = [];
+    for (int i = 1; i <= 20; i++) {
+        final ingredient = json['strIngredient$i'];
+        final measure = json['strMeasure$i'];
+        if (ingredient != null && ingredient.toString().trim().isNotEmpty) {
+            ingredients.add("${measure ?? ''} $ingredient");
+        }
+    }
+
+    return MealModel(
+      id: json['idMeal'] ?? '',
+      name: json['strMeal'] ?? 'Unknown Meal',
+      description: "${json['strCategory'] ?? 'General'} • ${json['strArea'] ?? 'International'}",
+      calories: calories,
+      protein: protein,
+      carbs: carbs,
+      fats: fats,
+      ingredients: ingredients,
+      instructions: (json['strInstructions'] as String? ?? '').split('\r\n').where((s) => s.isNotEmpty).toList(),
+      mealType: (json['strCategory'] == 'Breakfast') ? 'breakfast' : 'dinner', // Simple mapping
+      difficulty: 'medium',
+      imageUrl: json['strMealThumb'],
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -61,4 +95,3 @@ class MealModel {
     );
   }
 }
-

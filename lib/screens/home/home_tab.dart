@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,13 @@ import '../nutrition/nutrition_tab.dart';
 import '../supplements/supplements_tab.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
+import '../ai_assistant/ai_assistant_screen.dart';
+
+final userStreamProvider = StreamProvider<DocumentSnapshot>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return const Stream.empty();
+  return FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots();
+});
 
 class HomeTab extends ConsumerWidget {
   const HomeTab({super.key});
@@ -104,11 +112,32 @@ class HomeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final firebaseUser = FirebaseAuth.instance.currentUser;
-    final String displayName = firebaseUser?.displayName ?? "GymBuddy";
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = theme.textTheme.bodyLarge?.color ?? (isDark ? Colors.white : Colors.black);
 
+    final userAsyncValue = ref.watch(userStreamProvider);
     final trackingData = ref.watch(trackingProvider);
     final trackingNotifier = ref.read(trackingProvider.notifier);
+
+    String getDisplayName() {
+      return userAsyncValue.when(
+        data: (snapshot) {
+          if (snapshot.exists) {
+            final data = snapshot.data() as Map<String, dynamic>;
+            final name = data['name'] as String?;
+            if (name != null && name.isNotEmpty) {
+              return name;
+            }
+          }
+          return "GYMBUDDY"; // Name not found in Firestore
+        },
+        loading: () => "...",
+        error: (error, stack) => "GYMBUDDY",
+      );
+    }
+
+    final displayName = getDisplayName();
 
     void signOut() async {
       try {
@@ -121,7 +150,7 @@ class HomeTab extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -137,21 +166,48 @@ class HomeTab extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Welcome,", style: TextStyle(fontSize: 16, color: Colors.grey[600], fontWeight: FontWeight.w500)),
+                        Text("Welcome, ${displayName != "GYMBUDDY" ? displayName : ""}", 
+                            style: TextStyle(fontSize: 16, color: textColor.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
                         const SizedBox(height: 4),
-                        Text(displayName, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text("GYMBUDDY", 
+                            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: textColor), 
+                            maxLines: 1, 
+                            overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
-                  Container(
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 10)]),
-                    child: IconButton(onPressed: signOut, icon: Icon(Icons.logout_rounded, color: Colors.red[400]), tooltip: "Log Out"),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: theme.cardColor,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.08), blurRadius: 10)],
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                             Navigator.push(context, MaterialPageRoute(builder: (context) => const AIAssistantScreen()));
+                          },
+                          icon: const Icon(Icons.smart_toy_rounded, color: Colors.blueAccent),
+                          tooltip: "AI Assistant",
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: theme.cardColor,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.08), blurRadius: 10)],
+                        ),
+                        child: IconButton(onPressed: signOut, icon: Icon(Icons.logout_rounded, color: Colors.red[400]), tooltip: "Log Out"),
+                      ),
+                    ],
                   ),
                 ],
               ),
 
               const SizedBox(height: 24),
-              const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
               const SizedBox(height: 12),
 
               GridView.count(
@@ -170,11 +226,12 @@ class HomeTab extends ConsumerWidget {
               ),
 
               const SizedBox(height: 24),
-              const Text("Daily Tracking", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("Daily Tracking", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
               const SizedBox(height: 12),
 
               // --- DINAMIK TAKIP BARLARI ---
               _buildTrackingBar(
+                context: context,
                 title: "Daily Calories",
                 value: "${trackingData.currentCalories.toInt()} / ${trackingData.targetCalories.toInt()} kcal",
                 progress: (trackingData.currentCalories / trackingData.targetCalories).clamp(0.0, 1.0),
@@ -192,6 +249,7 @@ class HomeTab extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               _buildTrackingBar(
+                context: context,
                 title: "Water Consumption",
                 value: "${trackingData.currentWater.toStringAsFixed(1)} / ${trackingData.targetWater} L",
                 progress: (trackingData.currentWater / trackingData.targetWater).clamp(0.0, 1.0),
@@ -258,6 +316,7 @@ class HomeTab extends ConsumerWidget {
   }
 
   Widget _buildTrackingBar({
+    required BuildContext context,
     required String title,
     required String value,
     required double progress,
@@ -266,12 +325,20 @@ class HomeTab extends ConsumerWidget {
     required Color color2,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = theme.textTheme.bodyLarge?.color ?? (isDark ? Colors.white : Colors.black);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.08), blurRadius: 8, offset: const Offset(0, 3))]),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08), blurRadius: 8, offset: const Offset(0, 3))],
+        ),
         child: Row(
           children: [
             Container(
@@ -287,8 +354,8 @@ class HomeTab extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                      Text(value, style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500)),
+                      Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor)),
+                      Text(value, style: TextStyle(fontSize: 12, color: textColor.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -296,7 +363,7 @@ class HomeTab extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
                       value: progress,
-                      backgroundColor: color2.withValues(alpha: 0.15),
+                      backgroundColor: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.1),
                       valueColor: AlwaysStoppedAnimation<Color>(color1),
                       minHeight: 6,
                     ),
@@ -305,7 +372,7 @@ class HomeTab extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey[400]),
+            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: textColor.withValues(alpha: 0.4)),
           ],
         ),
       ),

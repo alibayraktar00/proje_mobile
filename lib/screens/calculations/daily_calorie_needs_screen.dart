@@ -44,9 +44,11 @@ class _DailyCalorieNeedsScreenState extends State<DailyCalorieNeedsScreen> {
 
   void _calculateCalories() {
     if (_formKey.currentState!.validate()) {
-      final int age = int.parse(_ageController.text);
-      final double height = double.parse(_heightController.text);
-      final double weight = double.parse(_weightController.text);
+      final int age = int.tryParse(_ageController.text) ?? 0;
+      final double height = double.tryParse(_heightController.text) ?? 0;
+      final double weight = double.tryParse(_weightController.text) ?? 0;
+
+      if (age == 0 || height == 0 || weight == 0) return;
 
       // Mifflin-St Jeor Equation
       double bmr;
@@ -71,110 +73,213 @@ class _DailyCalorieNeedsScreenState extends State<DailyCalorieNeedsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Colors.deepPurple;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text("Daily Calorie Needs"),
-        backgroundColor: Colors.deepPurple, // Different color to distinguish
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        foregroundColor: isDark ? Colors.white : Colors.black,
+        elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Result Card
-              if (_dailyCalories != null)
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 24),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Colors.deepPurple, Colors.purpleAccent],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDark 
+              ? [Colors.grey[900]!, Colors.black]
+              : [Colors.deepPurple.shade50, Colors.white],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                   // Result Card
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    child: _dailyCalories != null
+                      ? Container(
+                          key: const ValueKey('result'),
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 24),
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Colors.deepPurple, Colors.purpleAccent],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(color: Colors.deepPurple.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8)),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              const Text("Daily Target", style: TextStyle(color: Colors.white70, fontSize: 16)),
+                              const SizedBox(height: 8),
+                              Text("${_dailyCalories!.toStringAsFixed(0)} kcal", style: const TextStyle(color: Colors.white, fontSize: 42, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  _goal == 'lose' ? "Loss (approx. 0.5kg/week)" : (_goal == 'gain' ? "Gain (approx. 0.5kg/week)" : "Maintenance"),
+                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox(key: ValueKey('empty'), height: 0),
+                  ),
+
+                  _buildSectionTitle("Personal Details", isDark: isDark),
+                  
+                  // Gender Selector
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
                     ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(color: Colors.purple.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 5)),
-                    ],
+                    padding: const EdgeInsets.all(4),
+                    child: Row(
+                      children: [
+                        _buildGenderOption("Male", "male", Icons.male),
+                        _buildGenderOption("Female", "female", Icons.female),
+                      ],
+                    ),
                   ),
-                  child: Column(
+
+                  const SizedBox(height: 20),
+
+                  // Inputs Row
+                  Row(
                     children: [
-                      const Text("Daily Target", style: TextStyle(color: Colors.white70, fontSize: 16)),
-                      const SizedBox(height: 8),
-                      Text("${_dailyCalories!.toStringAsFixed(0)} kcal", style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Text(
-                        _goal == 'lose' ? "To Lose Weight" : (_goal == 'gain' ? "To Gain Muscle" : "To Maintain Weight"),
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                      Expanded(child: _buildModernInput("Age", _ageController, isDark)),
+                      const SizedBox(width: 16),
+                      Expanded(child: _buildModernInput("Height (cm)", _heightController, isDark)),
+                      const SizedBox(width: 16),
+                      Expanded(child: _buildModernInput("Weight (kg)", _weightController, isDark)),
+                    ],
+                  ),
+
+                  const SizedBox(height: 32),
+                  _buildSectionTitle("Activity Level", isDark: isDark),
+                  
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
+                      border: Border.all(color: isDark ? Colors.grey[700]! : Colors.grey.shade200),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<double>(
+                        value: _activityLevel,
+                        isExpanded: true,
+                        dropdownColor: isDark ? Colors.grey[800] : Colors.white,
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.deepPurple),
+                        items: const [
+                          DropdownMenuItem(value: 1.2, child: Text("🛋️  Sedentary (No exercise)")),
+                          DropdownMenuItem(value: 1.375, child: Text("🚶  Lightly Active (1-3 days)")),
+                          DropdownMenuItem(value: 1.55, child: Text("🏃  Moderately Active (3-5 days)")),
+                          DropdownMenuItem(value: 1.725, child: Text("🏋️  Very Active (6-7 days)")),
+                        ],
+                        onChanged: (v) => setState(() => _activityLevel = v!),
                       ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+                  _buildSectionTitle("Goal", isDark: isDark),
+
+                  // Goal Selector
+                  Row(
+                    children: [
+                      _buildGoalCard("Lose Fat", "lose", Icons.trending_down, Colors.redAccent),
+                      const SizedBox(width: 12),
+                      _buildGoalCard("Maintain", "maintain", Icons.balance, Colors.blueAccent),
+                      const SizedBox(width: 12),
+                      _buildGoalCard("Build Muscle", "gain", Icons.trending_up, Colors.green),
                     ],
                   ),
-                ),
 
-              _buildSectionTitle("Personal Details"),
-              Row(
-                children: [
-                  Expanded(child: _buildGenderSelector("Male", "male", Icons.male)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildGenderSelector("Female", "female", Icons.female)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(child: _buildInputField("Age", _ageController)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildInputField("Height (cm)", _heightController)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildInputField("Weight (kg)", _weightController)),
-                ],
-              ),
+                  const SizedBox(height: 40),
 
-              const SizedBox(height: 24),
-              _buildSectionTitle("Activity Level"),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<double>(
-                    value: _activityLevel,
-                    isExpanded: true,
-                    items: const [
-                      DropdownMenuItem(value: 1.2, child: Text("Sedentary (No exercise)")),
-                      DropdownMenuItem(value: 1.375, child: Text("Lightly Active (1-3 days/week)")),
-                      DropdownMenuItem(value: 1.55, child: Text("Moderately Active (3-5 days/week)")),
-                      DropdownMenuItem(value: 1.725, child: Text("Very Active (6-7 days/week)")),
-                    ],
-                    onChanged: (v) => setState(() => _activityLevel = v!),
+                  ElevatedButton(
+                    onPressed: _calculateCalories,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      elevation: 8,
+                      shadowColor: primaryColor.withValues(alpha: 0.4),
+                    ),
+                    child: const Text("CALCULATE RESULTS", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1)),
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-              _buildSectionTitle("Goal"),
-              Row(
-                children: [
-                  _buildGoalOption("Lose Fat", "lose"),
-                  _buildGoalOption("Maintain", "maintain"),
-                  _buildGoalOption("Build Muscle", "gain"),
                 ],
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _calculateCalories,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text("CALCULATE", style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
+  Widget _buildSectionTitle(String title, {required bool isDark}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12), 
+      child: Text(
+        title.toUpperCase(), 
+        style: TextStyle(
+          fontSize: 12, 
+          fontWeight: FontWeight.bold, 
+          color: isDark ? Colors.grey[400] : Colors.grey[600],
+          letterSpacing: 1.2
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGenderOption(String label, String value, IconData icon) {
+    bool isSelected = _selectedGender == value;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedGender = value),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.deepPurple : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: isSelected ? Colors.white : Colors.grey, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                label, 
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.grey, 
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14
+                )
               ),
             ],
           ),
@@ -183,44 +288,65 @@ class _DailyCalorieNeedsScreenState extends State<DailyCalorieNeedsScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)));
-  }
-
-  Widget _buildGenderSelector(String label, String value, IconData icon) {
-    bool isSelected = _selectedGender == value;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedGender = value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.deepPurple : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? Colors.deepPurple : Colors.grey.shade300),
+  Widget _buildModernInput(String label, TextEditingController controller, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start, 
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: isDark ? Colors.grey[800] : Colors.white,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.deepPurple, width: 2)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            hintText: "0",
+            hintStyle: TextStyle(color: Colors.grey.withValues(alpha: 0.5)),
+          ),
         ),
-        child: Column(children: [Icon(icon, color: isSelected ? Colors.white : Colors.grey), Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.bold))]),
-      ),
+      ]
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-      const SizedBox(height: 4),
-      TextFormField(controller: controller, keyboardType: TextInputType.number, decoration: InputDecoration(filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14))),
-    ]);
-  }
-
-  Widget _buildGoalOption(String label, String value) {
+  Widget _buildGoalCard(String label, String value, IconData icon, Color color) {
     bool isSelected = _goal == value;
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _goal = value),
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(color: isSelected ? Colors.deepPurple : Colors.grey.shade200, borderRadius: BorderRadius.circular(12)),
-          child: Center(child: Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.bold))),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? color : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? color : Colors.grey.withValues(alpha: 0.3),
+              width: isSelected ? 0 : 2
+            ),
+            boxShadow: isSelected ? [
+              BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))
+            ] : null,
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: isSelected ? Colors.white : Colors.grey, size: 28),
+              const SizedBox(height: 8),
+              Text(
+                label, 
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.grey, 
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12
+                )
+              ),
+            ],
+          ),
         ),
       ),
     );

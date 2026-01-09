@@ -5,7 +5,7 @@ import '../profile/profile_tab.dart';
 import 'task_manager_tab.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({Key? key}) : super(key: key);
+  const MainNavigationScreen({super.key});
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -23,6 +23,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final Color selectedColor = theme.colorScheme.primary;
+    final Color unselectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    final Color barBackground = theme.cardColor;
+
     return Scaffold(
       // Seçili sayfayı göster
       body: _tabs[_currentIndex],
@@ -32,7 +38,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -46,16 +52,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             });
           },
           type: BottomNavigationBarType.fixed, // Butonlar kaymasın diye sabitliyoruz
-          backgroundColor: Colors.white,
-          selectedItemColor: Colors.blueAccent, // Seçili olanın rengi
-          unselectedItemColor: Colors.grey,     // Seçili olmayanın rengi
+          backgroundColor: barBackground,
+          selectedItemColor: selectedColor, // Seçili olanın rengi
+          unselectedItemColor: unselectedColor,     // Seçili olmayanın rengi
           showSelectedLabels: true,
           showUnselectedLabels: false, // Seçili olmayanın yazısını gizle (Daha temiz görünüm)
 
           items: [
             // --- 1. BUTON: ANASAYFA (Standart) ---
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.home_rounded, size: 28), // Normal Boyut
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded, size: 28, color: _currentIndex == 0 ? selectedColor : unselectedColor), // Normal Boyut
               label: 'Anasayfa',
             ),
 
@@ -66,13 +72,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                     color: _currentIndex == 1
-                        ? Colors.blueAccent
-                        : Colors.blueAccent.withOpacity(0.1),
+                        ? selectedColor
+                        : selectedColor.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                     boxShadow: [
                       if(_currentIndex == 1) // Sadece seçiliyken gölge ver
                         BoxShadow(
-                          color: Colors.blueAccent.withOpacity(0.4),
+                          color: selectedColor.withValues(alpha: 0.35),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         )
@@ -82,15 +88,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 child: Icon(
                   Icons.assignment_turned_in_rounded, // Daha uygun bir ikon
                   size: 32,
-                  color: _currentIndex == 1 ? Colors.white : Colors.blueAccent,
+                  color: _currentIndex == 1 ? Colors.white : selectedColor,
                 ),
               ),
               label: 'Görevler',
             ),
 
             // --- 3. BUTON: PROFİL (Standart) ---
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.person_rounded, size: 28), // Normal Boyut
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_rounded, size: 28, color: _currentIndex == 2 ? selectedColor : unselectedColor), // Normal Boyut
               label: 'Profil',
             ),
           ],

@@ -3,60 +3,67 @@ import 'package:http/http.dart' as http;
 import '../models/exercise_model.dart';
 
 class ExerciseService {
-  // ExerciseDB (RapidAPI) configuration
-  static const String _apiHost = 'exercisedb.p.rapidapi.com';
-  static const String _baseUrl = 'https://$_apiHost';
-  static const String _apiKey = 'af35bb50e4msh8e6f1a6aa04dbdbp147efdjsn389d98db8f5a';
+  // Free Exercise DB (Open Source)
+  static const String _dataUrl = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json';
+  
+  static List<ExerciseModel>? _cachedExercises;
 
-  static Map<String, String> get _headers => {
-        'X-RapidAPI-Key': _apiKey,
-        'X-RapidAPI-Host': _apiHost,
-      };
-
-  /// Temel GET isteği
-  static Future<List<dynamic>> _get(String path) async {
-    final uri = Uri.parse('$_baseUrl$path');
-    final response = await http.get(uri, headers: _headers);
-
-    if (response.statusCode != 200) {
-      throw Exception('ExerciseDB isteği başarısız (${response.statusCode})');
+  /// Fetches all exercises from the open source DB.
+  /// Caches the result in memory to avoid repeated large downloads.
+  static Future<List<ExerciseModel>> _getAllExercises() async {
+    if (_cachedExercises != null) {
+      return _cachedExercises!;
     }
 
-    final decoded = json.decode(response.body);
-    if (decoded is List<dynamic>) {
-      return decoded;
+    try {
+      final response = await http.get(Uri.parse(_dataUrl));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load exercises (${response.statusCode})');
+      }
+
+      final List<dynamic> data = json.decode(response.body);
+      _cachedExercises = data.map((e) => ExerciseModel.fromFreeDB(e)).toList();
+      return _cachedExercises!;
+    } catch (e) {
+      throw Exception('Error fetching exercises: $e');
     }
-    throw Exception('ExerciseDB yanıtı beklenen formatta değil');
   }
 
-  /// Body part ve/veya ekipmana göre egzersiz listesi getirir.
+  /// Filters exercises based on body part (primary muscle) and/or equipment.
   static Future<List<ExerciseModel>> fetchExercises({
-    String? bodyPart,
+    List<String>? bodyParts, // Now supports multiple possibilities for a category
     String? equipment,
-    int limit = 40,
+    int limit = 50,
   }) async {
-    final path = bodyPart != null && bodyPart.isNotEmpty
-        ? '/exercises/bodyPart/$bodyPart'
-        : '/exercises';
+    // Ensure we have the data
+    var allExercises = await _getAllExercises();
 
-    final rawList = await _get(path);
-    var exercises = rawList.map((e) => ExerciseModel.fromApi(e as Map<String, dynamic>)).toList();
+    // Filter by Body Part (Muscle)
+    // The "bodyPart" argument here might be a list of muscles relevant to a category (e.g. Back -> lats, middle back)
+    if (bodyParts != null && bodyParts.isNotEmpty) {
+      allExercises = allExercises.where((ex) {
+        // ex.bodyPart comes from primaryMuscles[0]. 
+        // We check if it is in our allowed list.
+        return bodyParts.contains(ex.bodyPart.toLowerCase());
+      }).toList();
+    }
 
+    // Filter by Equipment
     if (equipment != null && equipment.isNotEmpty) {
-      exercises = exercises.where((ex) => ex.equipment?.toLowerCase() == equipment.toLowerCase()).toList();
+      allExercises = allExercises.where((ex) {
+        return ex.equipment?.toLowerCase() == equipment.toLowerCase();
+      }).toList();
     }
 
-    if (limit > 0 && exercises.length > limit) {
-      exercises = exercises.take(limit).toList();
+    // Shuffle for variety if no search query? (Optional, but good for "discovery")
+    // For now we just take the first N
+    if (limit > 0 && allExercises.length > limit) {
+      return allExercises.take(limit).toList();
     }
 
-    return exercises;
-  }
-
-  /// Tüm mevcut body part değerlerini getirir.
-  static Future<List<String>> fetchBodyParts() async {
-    final rawList = await _get('/exercises/bodyPartList');
-    return rawList.whereType<String>().toList();
+    return allExercises;
   }
 }
+
 

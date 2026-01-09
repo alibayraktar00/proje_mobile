@@ -32,7 +32,7 @@ class MealDetailScreen extends StatelessWidget {
                 height: 200,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -52,7 +52,7 @@ class MealDetailScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Chip(
               label: Text(meal.mealType.toUpperCase()),
-              backgroundColor: Colors.orange.withOpacity(0.2),
+              backgroundColor: Colors.orange.withValues(alpha: 0.2),
             ),
             const SizedBox(height: 16),
             Text(
@@ -216,4 +216,5 @@ class MealDetailScreen extends StatelessWidget {
     );
   }
 }
+
 

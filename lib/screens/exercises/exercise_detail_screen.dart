@@ -9,208 +9,229 @@ class ExerciseDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final difficultyLabel = (exercise.difficulty ?? "Intermediate").toUpperCase();
+    final difficultyLabel = (exercise.difficulty ?? "Intermediate");
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1021),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0B1021),
-        title: const Text("Exercise Detail", style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Hero(
-              tag: 'exercise-${exercise.id}',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: exercise.imageUrl != null && exercise.imageUrl!.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: exercise.imageUrl!,
-                        width: double.infinity,
-                        height: 260,
-                        fit: BoxFit.cover,
-                        fadeInDuration: const Duration(milliseconds: 200),
-                        placeholder: (c, _) => Container(
-                          height: 260,
-                          color: const Color(0xFF0F172A),
-                          alignment: Alignment.center,
-                          child: const CircularProgressIndicator(color: Colors.cyanAccent, strokeWidth: 2),
-                        ),
-                        errorWidget: (c, e, s) => Container(
-                          height: 260,
-                          color: const Color(0xFF0F172A),
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.broken_image, color: Colors.cyanAccent, size: 64),
-                        ),
-                      )
-                    : Container(
-                        height: 260,
-                        color: const Color(0xFF0F172A),
-                        alignment: Alignment.center,
-                        child: const Icon(Icons.fitness_center, color: Colors.cyanAccent, size: 64),
-                      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            leading: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).iconTheme.color, size: 20),
+                onPressed: () => Navigator.pop(context),
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              exercise.name,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _chip(exercise.bodyPart.toUpperCase(), Colors.cyanAccent),
-                _chip(difficultyLabel, Colors.pinkAccent),
-                if (exercise.equipment != null) _chip(exercise.equipment!, Colors.blueAccent),
-                if (exercise.target != null) _chip(exercise.target!, Colors.orangeAccent),
-                if (exercise.secondaryMuscles != null)
-                  ...exercise.secondaryMuscles!.map((m) => _chip(m, Colors.greenAccent)),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Text(
-              exercise.description.isNotEmpty ? exercise.description : "Bu egzersiz için açıklama bulunamadı.",
-              style: const TextStyle(fontSize: 16, color: Colors.white70, height: 1.5),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "Adımlar",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            if (exercise.instructions.isNotEmpty)
-              ...exercise.instructions.asMap().entries.map((entry) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: Colors.cyanAccent.withOpacity(0.9),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${entry.key + 1}',
-                            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          entry.value,
-                          style: const TextStyle(fontSize: 16, color: Colors.white70, height: 1.4),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              })
-            else
-              const Text(
-                "Bu egzersiz için adım bilgisi bulunamadı.",
-                style: TextStyle(color: Colors.white60),
-              ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: Row(
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
                 children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.play_circle_fill, color: Colors.black),
-                      label: const Text("Start Exercise", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.cyanAccent,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        elevation: 0,
+                  exercise.imageUrl != null && exercise.imageUrl!.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: exercise.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorWidget: (c, e, s) => Container(
+                            color: Colors.grey.withOpacity(0.1),
+                            child: const Icon(Icons.broken_image, size: 60, color: Colors.grey),
+                          ),
+                        )
+                      : Container(
+                          color: Colors.grey.withOpacity(0.1),
+                          child: const Icon(Icons.fitness_center, size: 60, color: Colors.grey),
+                        ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).scaffoldBackgroundColor,
+                          Colors.transparent,
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        stops: const [0.0, 0.5],
                       ),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Exercise başlatıldı!")),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.add_task, color: Colors.cyanAccent),
-                      label: const Text("Add to Workout", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.cyanAccent),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      ),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Listene eklendi!")),
-                        );
-                      },
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
-              "İpuçları",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    exercise.name,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildChip(context, exercise.bodyPart.toUpperCase(), Colors.blue),
+                      _buildChip(context, difficultyLabel, _getDifficultyColor(difficultyLabel)),
+                      if (exercise.equipment != null) _buildChip(context, exercise.equipment!, Colors.purple),
+                      if (exercise.target != null) _buildChip(context, exercise.target!, Colors.orange),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  if (exercise.description.isNotEmpty) ...[
+                    Text(
+                      "Açıklama",
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      exercise.description,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.6),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  Text(
+                    "Adımlar",
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  if (exercise.instructions.isNotEmpty)
+                    ...exercise.instructions.asMap().entries.map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: Colors.cyanAccent.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.cyanAccent),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${entry.key + 1}',
+                                  style: const TextStyle(
+                                    color: Colors.cyanAccent,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                entry.value,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    })
+                  else
+                    const Text(
+                      "Bu egzersiz için adım bilgisi bulunamadı.",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  const SizedBox(height: 24),
+                  _buildInfoSection(context, "İpuçları", "Formunu koru, hareket aralığını kontrol et ve nefesini ritmik tut. Ağrı hissedersen zorlamayı bırak."),
+                  const SizedBox(height: 20),
+                  _buildInfoSection(context, "Yaygın Hatalar", "Aşırı momentum kullanma, bel boşluğunu kaybetme, kontrolsüz iniş-kalkış ve uygunsuz nefes."),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.play_arrow_rounded, color: Colors.black),
+                      label: const Text("Egzersizi Başlat", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.cyanAccent,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Egzersiz başlatıldı!")),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 100), // Bottom padding
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "Formunu koru, hareket aralığını kontrol et ve nefesini ritmik tut. Ağrı hissedersen zorlamayı bırak.",
-              style: TextStyle(color: Colors.white70, height: 1.4),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              "Yaygın Hatalar",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "Aşırı momentum kullanma, bel boşluğunu kaybetme, kontrolsüz iniş-kalkış ve uygunsuz nefes.",
-              style: TextStyle(color: Colors.white70, height: 1.4),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              "Güvenlik Notları",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "Isınma yap, eklemlerini hazırlıksız yükleme. Ağrı veya rahatsızlıkta hareketi durdur ve hafiflet.",
-              style: TextStyle(color: Colors.white70, height: 1.4),
-            ),
-            const SizedBox(height: 18),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _chip(String text, Color color) {
+  Widget _buildInfoSection(BuildContext context, String title, String content) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.5)),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info_outline, size: 20, color: Colors.cyanAccent),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            content,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getDifficultyColor(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'beginner': return Colors.green;
+      case 'advanced': return Colors.red;
+      default: return Colors.orange;
+    }
+  }
+
+  Widget _buildChip(BuildContext context, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Text(
         text,
-        style: TextStyle(color: color, fontWeight: FontWeight.w600),
+        style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 13),
       ),
     );
   }
 }
+
 

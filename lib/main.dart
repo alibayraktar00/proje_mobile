@@ -5,7 +5,9 @@ import 'services/hive_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/main_navigation_screen.dart';
 import 'providers/auth_provider.dart';
+import 'providers/theme_provider.dart';
 import 'firebase_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,25 +35,33 @@ void main() async {
   // Initialize Hive (works without Firebase)
   await HiveService.init();
 
+  // Load Shared Preferences
+  final prefs = await SharedPreferences.getInstance();
+
   runApp(ProviderScope(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+    ],
     child: MyApp(firebaseInitialized: firebaseInitialized),
   ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   final bool firebaseInitialized;
   
   const MyApp({super.key, required this.firebaseInitialized});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+    final themeNotifier = ref.read(themeProvider.notifier);
+    
     return MaterialApp(
       title: 'GYMBUDDY',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: themeNotifier.getLightTheme(),
+      darkTheme: themeNotifier.getDarkTheme(),
+      themeMode: themeMode,
       home: firebaseInitialized 
           ? const AuthWrapper()
           : const FirebaseSetupScreen(),
