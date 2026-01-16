@@ -34,8 +34,15 @@ class WorkoutNotifier extends StateNotifier<WorkoutState> {
 
   Future<void> loadLogs() async {
     state = state.copyWith(isLoading: true);
-    final logs = await WorkoutService.getLogsForDate(state.selectedDate);
-    state = state.copyWith(logs: logs, isLoading: false);
+    try {
+      final logs = await WorkoutService.getLogsForDate(state.selectedDate);
+      state = state.copyWith(logs: logs, isLoading: false);
+    } catch (e) {
+      // Ensure loading is false on error
+      state = state.copyWith(isLoading: false);
+      // Optional: Store error in state if needed
+      print("Error loading logs: $e");
+    }
   }
 
   void selectDate(DateTime date) {

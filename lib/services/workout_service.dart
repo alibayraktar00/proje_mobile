@@ -23,20 +23,28 @@ class WorkoutService {
 
     // Create start and end of day dates
     final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+    final nextDay = startOfDay.add(const Duration(days: 1));
 
     final snapshot = await _firestore
         .collection('users')
         .doc(_uid)
         .collection('workout_logs')
         .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-        .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
-        .orderBy('timestamp', descending: true)
+        .where('timestamp', isLessThan: Timestamp.fromDate(nextDay))
         .get();
 
-    return snapshot.docs
+    final logs = snapshot.docs
         .map((doc) => WorkoutLogModel.fromMap(doc.data()))
+        .where((log) => 
+            log.timestamp.year == date.year && 
+            log.timestamp.month == date.month && 
+            log.timestamp.day == date.day)
         .toList();
+    
+    // Sort in memory to avoid composite index requirement
+    logs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    
+    return logs;
   }
 
   static Future<void> toggleStatus(String id, bool currentStatus) async {

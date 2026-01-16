@@ -35,6 +35,9 @@ class HomeTab extends ConsumerWidget {
     final TextEditingController amountController = TextEditingController();
     final TextEditingController targetController = TextEditingController();
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -50,10 +53,12 @@ class HomeTab extends ConsumerWidget {
               TextField(
                 controller: amountController,
                 keyboardType: TextInputType.number,
+                style: TextStyle(color: isDark ? Colors.white : Colors.black),
                 decoration: InputDecoration(
                   hintText: "Örn: 500 $unit",
+                  hintStyle: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
                   filled: true,
-                  fillColor: Colors.grey[100],
+                  fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
               ),
@@ -75,10 +80,12 @@ class HomeTab extends ConsumerWidget {
               TextField(
                 controller: targetController,
                 keyboardType: TextInputType.number,
+                style: TextStyle(color: isDark ? Colors.white : Colors.black),
                 decoration: InputDecoration(
                   hintText: "Yeni Hedef ($unit)",
+                  hintStyle: TextStyle(color: isDark ? Colors.white70 : Colors.blueGrey),
                   filled: true,
-                  fillColor: Colors.blue[50],
+                  fillColor: isDark ? Colors.blue.withOpacity(0.2) : Colors.blue[50],
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
               ),

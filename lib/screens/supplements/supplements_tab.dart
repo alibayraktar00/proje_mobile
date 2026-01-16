@@ -85,7 +85,7 @@ class _SupplementsTabState extends State<SupplementsTab> with SingleTickerProvid
               backgroundColor: theme.scaffoldBackgroundColor,
               elevation: 0,
               flexibleSpace: FlexibleSpaceBar(
-                titlePadding: const EdgeInsets.only(left: 20, bottom: 80), // Increased bottom padding to clear the TabBar
+                titlePadding: const EdgeInsets.only(left: 20, bottom: 90), // Increased bottom padding to clear the TabBar
                 title: Text(
                   'Supplementler',
                   style: TextStyle(
@@ -119,31 +119,27 @@ class _SupplementsTabState extends State<SupplementsTab> with SingleTickerProvid
                 ),
               ),
               bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(70), // Space for search + tab
+                preferredSize: const Size.fromHeight(80), // Increased height to fix overflow
                 child: Container(
                     decoration: BoxDecoration(
                         color: theme.scaffoldBackgroundColor,
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(20))
                     ),
-                    child: Column(
-                        children: [
-                             TabBar(
-                                controller: _tabController,
-                                labelColor: const Color(0xFF8E24AA),
-                                unselectedLabelColor: theme.disabledColor,
-                                indicatorColor: const Color(0xFF8E24AA),
-                                indicatorWeight: 3,
-                                indicatorSize: TabBarIndicatorSize.label,
-                                tabs: const [
-                                  Tab(text: "Rehber", icon: Icon(Icons.menu_book_rounded)),
-                                  Tab(text: "Market (Beta)", icon: Icon(Icons.shopping_bag_outlined)),
-                                ],
-                                onTap: (index) {
-                                  _searchController.clear();
-                                  _onSearchChanged("");
-                                },
-                              ),
-                        ],
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: const Color(0xFF8E24AA),
+                      unselectedLabelColor: theme.disabledColor,
+                      indicatorColor: const Color(0xFF8E24AA),
+                      indicatorWeight: 3,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      tabs: const [
+                        Tab(text: "Rehber", icon: Icon(Icons.menu_book_rounded)),
+                        Tab(text: "Market (Beta)", icon: Icon(Icons.shopping_bag_outlined)),
+                      ],
+                      onTap: (index) {
+                        _searchController.clear();
+                        _onSearchChanged("");
+                      },
                     ),
                 ),
               ),
