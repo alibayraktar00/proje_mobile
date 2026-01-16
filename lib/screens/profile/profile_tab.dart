@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import '../../providers/theme_provider.dart';
 import 'settings_screen.dart';
 
 class ProfileTab extends ConsumerStatefulWidget {
@@ -389,10 +388,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                       child: const Text("Save Changes", style: TextStyle(fontSize: 18, color: Colors.white)),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // Tema Seçim Kartı
-                  _buildThemeSelectionCard(),
-                  const SizedBox(height: 30),
+
                 ],
               ),
             ),
@@ -453,128 +449,5 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     );
   }
 
-  Widget _buildThemeSelectionCard() {
-    final themeMode = ref.watch(themeProvider);
-    final themeNotifier = ref.read(themeProvider.notifier);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final Color primaryColor = Colors.blue.shade800;
-    final textColor = theme.textTheme.bodyLarge?.color ?? (isDark ? Colors.white : Colors.black);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: isDark ? 0.3 : 0.1), blurRadius: 10)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.palette, color: primaryColor, size: 24),
-              const SizedBox(width: 12),
-              Text(
-                "Theme Selection",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _buildThemeOptionButton(
-                  title: "Light",
-                  icon: Icons.light_mode,
-                  isSelected: themeMode == ThemeMode.light,
-                  onTap: () => themeNotifier.setTheme(ThemeMode.light),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildThemeOptionButton(
-                  title: "Dark",
-                  icon: Icons.dark_mode,
-                  isSelected: themeMode == ThemeMode.dark,
-                  onTap: () => themeNotifier.setTheme(ThemeMode.dark),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildThemeOptionButton(
-                  title: "System",
-                  icon: Icons.brightness_auto,
-                  isSelected: themeMode == ThemeMode.system,
-                  onTap: () => themeNotifier.setTheme(ThemeMode.system),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildThemeOptionButton({
-    required String title,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final Color primaryColor = Colors.blue.shade800;
-    final textColor = theme.textTheme.bodyLarge?.color ?? (isDark ? Colors.white : Colors.black);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected 
-              ? primaryColor.withValues(alpha: 0.1) 
-              : (isDark ? Colors.grey[800] : Colors.grey[50]),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? primaryColor : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? primaryColor : textColor.withValues(alpha: 0.7),
-              size: 28,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? primaryColor : textColor,
-              ),
-            ),
-            if (isSelected)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Icon(
-                  Icons.check_circle,
-                  color: primaryColor,
-                  size: 16,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 }

@@ -108,7 +108,7 @@ class _NutritionTabState extends State<NutritionTab> {
                   gradient: LinearGradient(
                     colors: isDark 
                       ? [const Color(0xFF2C1E10), Colors.transparent]
-                      : [Colors.orange.withOpacity(0.15), Colors.transparent],
+                      : [Colors.orange.withValues(alpha: 0.15), Colors.transparent],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -120,7 +120,7 @@ class _NutritionTabState extends State<NutritionTab> {
                     child: Icon(
                       Icons.restaurant_menu, 
                       size: 80, 
-                      color: Colors.orange.withOpacity(isDark ? 0.1 : 0.2)
+                      color: Colors.orange.withValues(alpha: isDark ? 0.1 : 0.2)
                     ),
                   ),
                 ),
@@ -133,7 +133,7 @@ class _NutritionTabState extends State<NutritionTab> {
                   color: theme.cardColor,
                   shape: BoxShape.circle,
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))
                   ]
                 ),
                 child: IconButton(
@@ -153,7 +153,7 @@ class _NutritionTabState extends State<NutritionTab> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: _categories.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
                   final cat = _categories[index];
                   final isSelected = _selectedMealType == cat['value'];
@@ -206,7 +206,7 @@ class _NutritionTabState extends State<NutritionTab> {
                         const SizedBox(height: 16),
                         Text(
                           'No meals found matching criteria.',
-                          style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), fontSize: 16),
+                          style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6), fontSize: 16),
                         ),
                       ],
                     ),
@@ -238,7 +238,7 @@ class _NutritionTabState extends State<NutritionTab> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -265,7 +265,7 @@ class _NutritionTabState extends State<NutritionTab> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.1),
+                      color: Colors.orange.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
                       image: meal.imageUrl != null 
                         ? DecorationImage(
@@ -301,7 +301,7 @@ class _NutritionTabState extends State<NutritionTab> {
                         meal.description,
                         style: TextStyle(
                           fontSize: 13, 
-                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6)
+                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6)
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -340,9 +340,9 @@ class _NutritionTabState extends State<NutritionTab> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Text(
         text,
