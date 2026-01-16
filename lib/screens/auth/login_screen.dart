@@ -66,11 +66,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 60),
-                const Icon(
-                  Icons.fitness_center,
-                  size: 80,
-                  color: Colors.blue,
+                const SizedBox(height: 40),
+                // Logo
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      height: 180,
+                      width: 300,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Fallback to icon if logo not found
+                        return const Icon(
+                          Icons.fitness_center,
+                          size: 80,
+                          color: Colors.blue,
+                        );
+                      },
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 const Text(
