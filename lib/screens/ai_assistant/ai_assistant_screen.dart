@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 import '../../services/ai_service.dart';
 
 class AIAssistantScreen extends ConsumerStatefulWidget {
@@ -16,18 +15,16 @@ class _AIAssistantScreenState extends ConsumerState<AIAssistantScreen> {
   
   // Chat history with local state
   final List<Map<String, String>> _messages = [
-    {"role": "assistant", "content": "Hello! I'm your GymBuddy AI assistant. Ask me anything about workouts, nutrition, or supplements!"}
+    {"role": "assistant", "content": "Merhaba! Ben senin GymBuddy AI asistanın. Antrenman, beslenme veya supplementler hakkında sorular sorabilirsin!"}
   ];
   
   bool _isLoading = false;
-  ChatSession? _chatSession;
+  late final AIService _aiService;
 
   @override
   void initState() {
     super.initState();
-    // Initialize chat session on start
-    // We defer this slightly to ensure provider is ready if needed, 
-    // technically safe in initState for this simple provider.
+    _aiService = ref.read(aiServiceProvider);
   }
 
   Future<void> _sendMessage() async {
@@ -43,15 +40,7 @@ class _AIAssistantScreenState extends ConsumerState<AIAssistantScreen> {
     _scrollToBottom();
 
     try {
-      final aiService = ref.read(aiServiceProvider);
-      
-      // Initialize session if not already
-      if (_chatSession == null) {
-        _chatSession = aiService.startChat();
-      }
-
-      final response = await _chatSession!.sendMessage(Content.text(text));
-      final responseText = response.text ?? "No response.";
+      final responseText = await _aiService.sendMessage(text);
 
       if (mounted) {
         setState(() {
@@ -62,8 +51,19 @@ class _AIAssistantScreenState extends ConsumerState<AIAssistantScreen> {
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = "Üzgünüm, bir hata oluştu.";
+        if (e.toString().contains('API_KEY') || e.toString().contains('401')) {
+          errorMessage = "API key hatası. Lütfen .env dosyanızı kontrol edin.";
+        } else if (e.toString().contains('network') || e.toString().contains('connection')) {
+          errorMessage = "İnternet bağlantınızı kontrol edin.";
+        } else if (e.toString().contains('quota') || e.toString().contains('limit')) {
+          errorMessage = "API kotası doldu. Lütfen daha sonra tekrar deneyin.";
+        } else {
+          errorMessage = "Hata: ${e.toString()}";
+        }
+        
         setState(() {
-          _messages.add({"role": "assistant", "content": "Error: $e"});
+          _messages.add({"role": "assistant", "content": errorMessage});
           _isLoading = false;
         });
         _scrollToBottom();

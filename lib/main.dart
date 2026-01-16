@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/hive_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/main_navigation_screen.dart';
@@ -11,6 +12,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint('Warning: .env file not found. Make sure to create .env file with GEMINI_API_KEY');
+  }
   // Initialize Firebase
   bool firebaseInitialized = false;
   try {
