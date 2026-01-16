@@ -26,22 +26,41 @@ class SupplementDetailScreen extends StatelessWidget {
                   shadows: [Shadow(color: Colors.black45, blurRadius: 10)],
                 ),
               ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: [Colors.purple, Colors.deepPurple[900]!],
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.science_outlined,
-                    size: 80,
-                    color: Colors.white.withValues(alpha: 0.2),
-                  ),
-                ),
-              ),
+              background: supplement.assetPath != null
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(
+                          supplement.assetPath!,
+                          fit: BoxFit.cover,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                          colors: [Colors.purple, Colors.deepPurple[900]!],
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.science_outlined,
+                          size: 80,
+                          color: Colors.white.withValues(alpha: 0.2),
+                        ),
+                      ),
+                    ),
             ),
           ),
           SliverToBoxAdapter(

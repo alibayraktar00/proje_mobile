@@ -18,30 +18,30 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
   final TextEditingController _setsController = TextEditingController(text: "3");
   final TextEditingController _repsController = TextEditingController(text: "12");
 
-  String _selectedCategory = "Tümü";
-  String _selectedEquipment = "Tümü";
-  String _selectedDifficulty = "Tümü";
+  String _selectedCategory = "All";
+  String _selectedEquipment = "All";
+  String _selectedDifficulty = "All";
 
-  final List<String> _categories = ["Tümü", "Göğüs", "Sırt", "Bacak", "Omuz", "Kol", "Karın", "Cardio"];
-  final List<String> _equipments = ["Tümü", "Barbell", "Dumbbell", "Makine", "Vücut Ağırlığı", "Kablo"];
-  final List<String> _difficulties = ["Tümü", "Beginner", "Intermediate", "Advanced"];
+  final List<String> _categories = ["All", "Chest", "Back", "Legs", "Shoulders", "Arms", "Abs", "Cardio"];
+  final List<String> _equipments = ["All", "Barbell", "Dumbbell", "Machine", "Bodyweight", "Cable"];
+  final List<String> _difficulties = ["All", "Beginner", "Intermediate", "Advanced"];
 
   final Map<String, List<String>> _bodyPartMap = {
-    "Göğüs": ["chest"],
-    "Sırt": ["lats", "middle back", "lower back", "traps"],
-    "Bacak": ["quadriceps", "hamstrings", "glutes", "calves", "adductors", "abductors"],
-    "Omuz": ["shoulders", "neck"],
-    "Kol": ["biceps", "triceps", "forearms"],
-    "Karın": ["abdominals"],
+    "Chest": ["chest"],
+    "Back": ["lats", "middle back", "lower back", "traps"],
+    "Legs": ["quadriceps", "hamstrings", "glutes", "calves", "adductors", "abductors"],
+    "Shoulders": ["shoulders", "neck"],
+    "Arms": ["biceps", "triceps", "forearms"],
+    "Abs": ["abdominals"],
     "Cardio": ["cardio"],
   };
 
   final Map<String, String> _equipmentMap = {
     "Barbell": "barbell",
     "Dumbbell": "dumbbell",
-    "Makine": "machine",
-    "Vücut Ağırlığı": "body only",
-    "Kablo": "cable",
+    "Machine": "machine",
+    "Bodyweight": "body only",
+    "Cable": "cable",
   };
 
   bool _isLoading = true;
@@ -83,7 +83,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
       });
     } catch (_) {
       setState(() {
-        _error = "Veri alınamadı. İnternet bağlantınızı kontrol edin.";
+        _error = "Failed to fetch data. Check your internet connection.";
       });
     } finally {
       if (mounted) {
@@ -98,7 +98,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
     final query = _searchController.text.toLowerCase();
     return _exercises.where((ex) {
       final matchesSearch = query.isEmpty || ex.name.toLowerCase().contains(query);
-      final matchesDifficulty = _selectedDifficulty == "Tümü" || (ex.difficulty ?? "Intermediate").toLowerCase() == _selectedDifficulty.toLowerCase();
+      final matchesDifficulty = _selectedDifficulty == "All" || (ex.difficulty ?? "Intermediate").toLowerCase() == _selectedDifficulty.toLowerCase();
       return matchesSearch && matchesDifficulty;
     }).toList();
   }
@@ -136,19 +136,19 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Filtrele", style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      Text("Filter", style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                       IconButton(
                         onPressed: () {
                           setState(() {
-                            _selectedCategory = "Tümü";
-                            _selectedEquipment = "Tümü";
-                            _selectedDifficulty = "Tümü";
+                            _selectedCategory = "All";
+                            _selectedEquipment = "All";
+                            _selectedDifficulty = "All";
                           });
                           Navigator.pop(context);
                           _fetchExercises();
                         },
                         icon: const Icon(Icons.refresh),
-                        tooltip: "Sıfırla",
+                        tooltip: "Reset",
                       ),
                     ],
                   ),
@@ -157,11 +157,11 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                     child: ListView(
                       controller: scrollController,
                       children: [
-                        _buildFilterSection("Kas Grubu", _categories, _selectedCategory, (val) => setState(() => _selectedCategory = val)),
+                        _buildFilterSection("Body Part", _categories, _selectedCategory, (val) => setState(() => _selectedCategory = val)),
                         const SizedBox(height: 24),
-                        _buildFilterSection("Ekipman", _equipments, _selectedEquipment, (val) => setState(() => _selectedEquipment = val)),
+                        _buildFilterSection("Equipment", _equipments, _selectedEquipment, (val) => setState(() => _selectedEquipment = val)),
                         const SizedBox(height: 24),
-                        _buildFilterSection("Zorluk", _difficulties, _selectedDifficulty, (val) => setState(() => _selectedDifficulty = val)),
+                        _buildFilterSection("Difficulty", _difficulties, _selectedDifficulty, (val) => setState(() => _selectedDifficulty = val)),
                       ],
                     ),
                   ),
@@ -180,7 +180,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                         Navigator.pop(context);
                         _fetchExercises();
                       },
-                      child: const Text("Filtreyi Uygula", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text("Apply Filter", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   )
                 ],
@@ -289,11 +289,11 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildNumberInput(_setsController, "Set"),
+                    child: _buildNumberInput(_setsController, "Sets"),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildNumberInput(_repsController, "Tekrar"),
+                    child: _buildNumberInput(_repsController, "Reps"),
                   ),
                 ],
               ),
@@ -316,7 +316,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text("${exercise.name} antrenmana eklendi!"),
+                        content: Text("${exercise.name} added to workout!"),
                         behavior: SnackBarBehavior.floating,
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -324,7 +324,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                     );
                   },
                   icon: const Icon(Icons.add_task),
-                  label: const Text("Listeme Ekle", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  label: const Text("Add to List", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -381,7 +381,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
               flexibleSpace: FlexibleSpaceBar(
                 titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 title: Text(
-                  "Egzersizler",
+                  "Exercises",
                   style: TextStyle(
                     color: Theme.of(context).textTheme.titleLarge?.color,
                     fontWeight: FontWeight.bold,
@@ -423,7 +423,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                     TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: "Egzersiz ara...",
+                        hintText: "Search exercises...",
                         prefixIcon: const Icon(Icons.search),
                         filled: true,
                         fillColor: Theme.of(context).cardColor,
@@ -502,7 +502,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
             ElevatedButton.icon(
               onPressed: _fetchExercises,
               icon: const Icon(Icons.refresh),
-              label: const Text("Tekrar dene"),
+              label: const Text("Try again"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.cyanAccent, 
                 foregroundColor: Colors.black,
@@ -523,7 +523,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
             Icon(Icons.search_off, size: 64, color: Colors.grey.withOpacity(0.5)),
             const SizedBox(height: 16),
             const Text(
-              "Egzersiz bulunamadı.",
+              "No exercises found.",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey),
             ),
           ],

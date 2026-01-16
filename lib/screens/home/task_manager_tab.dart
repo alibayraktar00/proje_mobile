@@ -27,7 +27,7 @@ class TaskManagerTab extends ConsumerWidget {
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
               title: Text(
-                "Antreman Günlüğü",
+                "Workout Diary",
                 style: TextStyle(
                   color: theme.textTheme.titleLarge?.color,
                   fontWeight: FontWeight.bold,
@@ -146,14 +146,14 @@ class TaskManagerTab extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "${logs.length} Egzersiz", 
+                      "${logs.length} Exercises", 
                       style: TextStyle(
                         color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), 
                         fontWeight: FontWeight.w600
                       )
                     ),
                     Text(
-                      "${logs.where((l) => l.isCompleted).length} Tamamlandı", 
+                      "${logs.where((l) => l.isCompleted).length} Completed", 
                       style: TextStyle(
                         color: Colors.green, 
                         fontWeight: FontWeight.bold
@@ -183,12 +183,12 @@ class TaskManagerTab extends ConsumerWidget {
                    ),
                    const SizedBox(height: 16),
                    Text(
-                     "Kayıt Yok",
+                     "No Records",
                      style: TextStyle(color: theme.textTheme.bodyLarge?.color, fontSize: 18, fontWeight: FontWeight.bold),
                    ),
                    const SizedBox(height: 8),
                    Text(
-                     "Bu tarihte yapılmış egzersiz yok.",
+                     "No exercises for this date.",
                      style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 14),
                    ),
                  ],
@@ -313,9 +313,9 @@ class TaskManagerTab extends ConsumerWidget {
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                              _buildMiniBadge(theme, "${log.sets} Set", theme.colorScheme.primary),
+                              _buildMiniBadge(theme, "${log.sets} Sets", theme.colorScheme.primary),
                               const SizedBox(width: 8),
-                              _buildMiniBadge(theme, "${log.reps} Tekrar", Colors.orange),
+                              _buildMiniBadge(theme, "${log.reps} Reps", Colors.orange),
                           ],
                         )
                       ],

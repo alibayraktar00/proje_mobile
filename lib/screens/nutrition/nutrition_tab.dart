@@ -18,11 +18,11 @@ class _NutritionTabState extends State<NutritionTab> {
   
   // Categories for the filter chips. Value null means "All"
   final List<Map<String, String?>> _categories = [
-    {'label': 'Tümü', 'value': null},
-    {'label': 'Kahvaltı', 'value': 'breakfast'},
-    {'label': 'Öğle', 'value': 'lunch'},
-    {'label': 'Akşam', 'value': 'dinner'},
-    {'label': 'Atıştırmalık', 'value': 'snack'},
+    {'label': 'All', 'value': null},
+    {'label': 'Breakfast', 'value': 'breakfast'},
+    {'label': 'Lunch', 'value': 'lunch'},
+    {'label': 'Dinner', 'value': 'dinner'},
+    {'label': 'Snack', 'value': 'snack'},
   ];
 
   @override
@@ -96,7 +96,7 @@ class _NutritionTabState extends State<NutritionTab> {
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
               title: Text(
-                'Beslenme Planım',
+                'My Nutrition Plan',
                 style: TextStyle(
                   color: theme.textTheme.titleLarge?.color,
                   fontWeight: FontWeight.bold,
@@ -193,7 +193,7 @@ class _NutritionTabState extends State<NutritionTab> {
                       children: [
                         Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
                         const SizedBox(height: 16),
-                        Text('Hata oluştu: ${snapshot.error}', textAlign: TextAlign.center),
+                        Text('Error occurred: ${snapshot.error}', textAlign: TextAlign.center),
                       ],
                     ),
                   );
@@ -205,7 +205,7 @@ class _NutritionTabState extends State<NutritionTab> {
                         Icon(Icons.no_meals, size: 64, color: theme.disabledColor),
                         const SizedBox(height: 16),
                         Text(
-                          'Kriterlere uygun yemek bulunamadı.',
+                          'No meals found matching criteria.',
                           style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), fontSize: 16),
                         ),
                       ],

@@ -92,7 +92,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Profil başarıyla güncellendi!"),
+          content: Text("Profile updated successfully!"),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
         ),
@@ -100,7 +100,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     } catch (e, stack) {
       debugPrint("Update Error: $e\n$stack");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Hata: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     } finally {
       if (mounted) setState(() { _isLoading = false; });
@@ -120,14 +120,14 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Profil Fotoğrafı Seç", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("Select Profile Photo", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildSourceButton(
                   icon: Icons.camera_alt,
-                  label: "Kamera",
+                  label: "Camera",
                   onTap: () {
                     Navigator.pop(context);
                     _pickImageFromSource(ImageSource.camera);
@@ -135,7 +135,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                 ),
                 _buildSourceButton(
                   icon: Icons.photo_library,
-                  label: "Galeri",
+                  label: "Gallery",
                   onTap: () {
                     Navigator.pop(context);
                     _pickImageFromSource(ImageSource.gallery);
@@ -196,8 +196,8 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
          if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text("İzin reddedildi. Ayarlardan izin vermeniz gerekiyor."),
-              action: SnackBarAction(label: "Ayarlar", onPressed: openAppSettings),
+              content: const Text("Permission denied. You need to allow access in settings."),
+              action: SnackBarAction(label: "Settings", onPressed: openAppSettings),
             ),
           );
         }
@@ -223,7 +223,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     } catch (e) {
       debugPrint("Image Picker Error: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Resim seçilemedi: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Image not selected: $e")));
       }
     }
   }
@@ -292,7 +292,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                     right: 0,
                     child: const Center(
                       child: Text(
-                        "Profil Düzenle",
+                        "Edit Profile",
                         style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -360,20 +360,20 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                     ),
                     child: Column(
                       children: [
-                        _buildModernTextField("Adınız", _nameController, Icons.person, theme),
+                        _buildModernTextField("Name", _nameController, Icons.person, theme),
                         const SizedBox(height: 15),
-                        _buildModernTextField("Soyadınız", _surnameController, Icons.person_outline, theme),
+                        _buildModernTextField("Surname", _surnameController, Icons.person_outline, theme),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      Expanded(child: _buildStatCard("Yaş", _ageController, Icons.cake, Colors.orange, theme)),
+                      Expanded(child: _buildStatCard("Age", _ageController, Icons.cake, Colors.orange, theme)),
                       const SizedBox(width: 10),
-                      Expanded(child: _buildStatCard("Boy (cm)", _heightController, Icons.height, Colors.blue, theme)),
+                      Expanded(child: _buildStatCard("Height (cm)", _heightController, Icons.height, Colors.blue, theme)),
                       const SizedBox(width: 10),
-                      Expanded(child: _buildStatCard("Kilo (kg)", _weightController, Icons.monitor_weight, Colors.purple, theme)),
+                      Expanded(child: _buildStatCard("Weight (kg)", _weightController, Icons.monitor_weight, Colors.purple, theme)),
                     ],
                   ),
                   const SizedBox(height: 30),
@@ -386,7 +386,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                         backgroundColor: primaryColor,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                       ),
-                      child: const Text("Değişiklikleri Kaydet", style: TextStyle(fontSize: 18, color: Colors.white)),
+                      child: const Text("Save Changes", style: TextStyle(fontSize: 18, color: Colors.white)),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -476,7 +476,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
               Icon(Icons.palette, color: primaryColor, size: 24),
               const SizedBox(width: 12),
               Text(
-                "Tema Seçimi",
+                "Theme Selection",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -490,7 +490,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
             children: [
               Expanded(
                 child: _buildThemeOptionButton(
-                  title: "Açık",
+                  title: "Light",
                   icon: Icons.light_mode,
                   isSelected: themeMode == ThemeMode.light,
                   onTap: () => themeNotifier.setTheme(ThemeMode.light),
@@ -499,7 +499,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildThemeOptionButton(
-                  title: "Koyu",
+                  title: "Dark",
                   icon: Icons.dark_mode,
                   isSelected: themeMode == ThemeMode.dark,
                   onTap: () => themeNotifier.setTheme(ThemeMode.dark),
@@ -508,7 +508,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildThemeOptionButton(
-                  title: "Sistem",
+                  title: "System",
                   icon: Icons.brightness_auto,
                   isSelected: themeMode == ThemeMode.system,
                   onTap: () => themeNotifier.setTheme(ThemeMode.system),

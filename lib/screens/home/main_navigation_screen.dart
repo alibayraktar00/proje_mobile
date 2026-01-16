@@ -62,7 +62,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             // --- 1. BUTON: ANASAYFA (Standart) ---
             BottomNavigationBarItem(
               icon: Icon(Icons.home_rounded, size: 28, color: _currentIndex == 0 ? selectedColor : unselectedColor), // Normal Boyut
-              label: 'Anasayfa',
+              label: 'Home',
             ),
 
             // --- 2. BUTON: TASK MANAGER (BÜYÜK VE HAVALI) ---
@@ -91,13 +91,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   color: _currentIndex == 1 ? Colors.white : selectedColor,
                 ),
               ),
-              label: 'Görevler',
+              label: 'Workouts',
             ),
 
             // --- 3. BUTON: PROFİL (Standart) ---
             BottomNavigationBarItem(
               icon: Icon(Icons.person_rounded, size: 28, color: _currentIndex == 2 ? selectedColor : unselectedColor), // Normal Boyut
-              label: 'Profil',
+              label: 'Profile',
             ),
           ],
         ),

@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+
 import '../models/supplement_model.dart';
 
 class SupplementService {
@@ -21,36 +20,7 @@ class SupplementService {
     return _allSupplements;
   }
 
-  // --- API Integration ---
 
-  static Future<List<dynamic>> searchProducts(String query) async {
-    if (query.isEmpty) return [];
-    
-    // Using Open Food Facts API v2
-    final url = Uri.parse(
-      'https://world.openfoodfacts.org/api/v2/search?categories_tags_en=dietary-supplements&search_terms=$query&fields=code,product_name,brands,image_url,nutriments&page_size=30'
-    );
-
-    try {
-      final response = await http.get(
-        url, 
-        headers: {
-          'User-Agent': 'GymBuddy/1.0 (gymbuddy@example.com) - Android App',
-          'Accept': 'application/json',
-        }
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['products'] != null) {
-          return data['products'];
-        }
-      }
-    } catch (e) {
-      print("API Error: $e");
-    }
-    return [];
-  }
 
   // --- Static Data ---
 

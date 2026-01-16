@@ -90,7 +90,7 @@ class ExerciseDetailScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   if (exercise.description.isNotEmpty) ...[
                     Text(
-                      "Açıklama",
+                      "Description",
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
@@ -101,7 +101,7 @@ class ExerciseDetailScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                   ],
                   Text(
-                    "Adımlar",
+                    "Steps",
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -143,20 +143,20 @@ class ExerciseDetailScreen extends StatelessWidget {
                     })
                   else
                     const Text(
-                      "Bu egzersiz için adım bilgisi bulunamadı.",
+                      "No instructions found for this exercise.",
                       style: TextStyle(color: Colors.grey),
                     ),
                   const SizedBox(height: 24),
-                  _buildInfoSection(context, "İpuçları", "Formunu koru, hareket aralığını kontrol et ve nefesini ritmik tut. Ağrı hissedersen zorlamayı bırak."),
+                  _buildInfoSection(context, "Tips", "Keep your form, control your range of motion, and keep your breathing rhythmic. Stop if you feel pain."),
                   const SizedBox(height: 20),
-                  _buildInfoSection(context, "Yaygın Hatalar", "Aşırı momentum kullanma, bel boşluğunu kaybetme, kontrolsüz iniş-kalkış ve uygunsuz nefes."),
+                  _buildInfoSection(context, "Common Mistakes", "Using excessive momentum, losing lower back arch, uncontrolled descent/ascent, and improper breathing."),
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.play_arrow_rounded, color: Colors.black),
-                      label: const Text("Egzersizi Başlat", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
+                      label: const Text("Start Exercise", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.cyanAccent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -164,7 +164,7 @@ class ExerciseDetailScreen extends StatelessWidget {
                       ),
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Egzersiz başlatıldı!")),
+                          const SnackBar(content: Text("Exercise started!")),
                         );
                       },
                     ),

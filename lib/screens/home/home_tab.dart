@@ -48,14 +48,14 @@ class HomeTab extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Miktar Ekleme Bölümü
-              const Text("Bugüne Ekle", style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text("Add to Today", style: TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextField(
                 controller: amountController,
                 keyboardType: TextInputType.number,
                 style: TextStyle(color: isDark ? Colors.white : Colors.black),
                 decoration: InputDecoration(
-                  hintText: "Örn: 500 $unit",
+                  hintText: "Ex: 500 $unit",
                   hintStyle: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
                   filled: true,
                   fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
@@ -70,19 +70,19 @@ class HomeTab extends ConsumerWidget {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 45)),
-                child: const Text("Ekle"),
+                child: const Text("Add"),
               ),
               const Divider(height: 32),
 
               // Hedef Belirleme Bölümü
-              const Text("Günlük Hedefi Güncelle", style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text("Update Daily Target", style: TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextField(
                 controller: targetController,
                 keyboardType: TextInputType.number,
                 style: TextStyle(color: isDark ? Colors.white : Colors.black),
                 decoration: InputDecoration(
-                  hintText: "Yeni Hedef ($unit)",
+                  hintText: "New Target ($unit)",
                   hintStyle: TextStyle(color: isDark ? Colors.white70 : Colors.blueGrey),
                   filled: true,
                   fillColor: isDark ? Colors.blue.withOpacity(0.2) : Colors.blue[50],
@@ -97,7 +97,7 @@ class HomeTab extends ConsumerWidget {
                   Navigator.pop(context);
                 },
                 style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 45)),
-                child: const Text("Hedefi Kaydet"),
+                child: const Text("Save Target"),
               ),
               const Divider(height: 32),
 
@@ -108,7 +108,7 @@ class HomeTab extends ConsumerWidget {
                   Navigator.pop(context);
                 },
                 icon: const Icon(Icons.refresh, color: Colors.red),
-                label: const Text("İlerlemeyi Sıfırla", style: TextStyle(color: Colors.red)),
+                label: const Text("Reset Progress", style: TextStyle(color: Colors.red)),
               ),
             ],
           ),
@@ -247,7 +247,7 @@ class HomeTab extends ConsumerWidget {
                 color2: Colors.orangeAccent,
                 onTap: () => _showActionDialog(
                   context: context,
-                  title: "Kalori Ayarları",
+                  title: "Calorie Settings",
                   unit: "kcal",
                   onAdd: (val) => trackingNotifier.addCalories(val),
                   onSetTarget: (val) => trackingNotifier.setTargetCalories(val),
@@ -265,7 +265,7 @@ class HomeTab extends ConsumerWidget {
                 color2: Colors.lightBlueAccent,
                 onTap: () => _showActionDialog(
                   context: context,
-                  title: "Su Ayarları",
+                  title: "Water Settings",
                   unit: "L",
                   onAdd: (val) => trackingNotifier.addWater(val),
                   onSetTarget: (val) => trackingNotifier.setTargetWater(val),
