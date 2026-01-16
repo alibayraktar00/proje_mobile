@@ -23,6 +23,48 @@ final userStreamProvider = StreamProvider<DocumentSnapshot>((ref) {
 class HomeTab extends ConsumerWidget {
   const HomeTab({super.key});
 
+  // Animasyonlu geçiş fonksiyonu
+  static void _navigateWithAnimation(BuildContext context, Widget destination) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => destination,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          // Fade + Slide animasyonu
+          const begin = Offset(0.0, 0.1);
+          const end = Offset.zero;
+          const curve = Curves.easeOutCubic;
+
+          var fadeAnimation = Tween<double>(
+            begin: 0.0,
+            end: 1.0,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: curve,
+          ));
+
+          var slideAnimation = Tween<Offset>(
+            begin: begin,
+            end: end,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: curve,
+          ));
+
+          return FadeTransition(
+            opacity: fadeAnimation,
+            child: SlideTransition(
+              position: slideAnimation,
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+        reverseTransitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
+  }
+
   // Gelişmiş Aksiyon Paneli
   void _showActionDialog({
     required BuildContext context,
@@ -225,10 +267,10 @@ class HomeTab extends ConsumerWidget {
                 mainAxisSpacing: 12.0,
                 childAspectRatio: 1.6,
                 children: [
-                  _buildModernCard(context, "Exercise", "Follow Your Program", Icons.fitness_center_rounded, Colors.blueAccent, Colors.lightBlueAccent, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ExercisesTab()))),
-                  _buildModernCard(context, "Calculate", "Body İndex", Icons.calculate_rounded, Colors.orange, Colors.deepOrangeAccent, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CalculationsTab()))),
-                  _buildModernCard(context, "Supplements", "Supplement List", Icons.local_pharmacy_rounded, Colors.green, Colors.tealAccent, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SupplementsTab()))),
-                  _buildModernCard(context, "Nutrition", "Diet and Meals", Icons.restaurant_menu_rounded, Colors.redAccent, Colors.pinkAccent, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const NutritionTab()))),
+                  _buildModernCard(context, "Exercise", "Follow Your Program", Icons.fitness_center_rounded, Colors.blueAccent, Colors.lightBlueAccent, "assets/images/exercise_bg.png", () => _navigateWithAnimation(context, const ExercisesTab())),
+                  _buildModernCard(context, "Calculate", "Body İndex", Icons.calculate_rounded, Colors.orange, Colors.deepOrangeAccent, "assets/images/calculate_bg.png", () => _navigateWithAnimation(context, const CalculationsTab())),
+                  _buildModernCard(context, "Supplements", "Supplement List", Icons.local_pharmacy_rounded, Colors.green, Colors.tealAccent, "assets/images/supplements_bg.png", () => _navigateWithAnimation(context, const SupplementsTab())),
+                  _buildModernCard(context, "Nutrition", "Diet and Meals", Icons.restaurant_menu_rounded, Colors.redAccent, Colors.pinkAccent, "assets/images/nutrition_bg.png", () => _navigateWithAnimation(context, const NutritionTab())),
                 ],
               ),
 
@@ -281,7 +323,7 @@ class HomeTab extends ConsumerWidget {
   }
 
   // Arayüz Widget'ları (ModernCard ve TrackingBar)
-  Widget _buildModernCard(BuildContext context, String title, String subtitle, IconData icon, Color c1, Color c2, VoidCallback onTap) {
+  Widget _buildModernCard(BuildContext context, String title, String subtitle, IconData icon, Color c1, Color c2, String? backgroundImage, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -293,6 +335,39 @@ class HomeTab extends ConsumerWidget {
         ),
         child: Stack(
           children: [
+            // Arka plan görseli
+            if (backgroundImage != null)
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Opacity(
+                    opacity: 0.3, // Görseli hafif yapıyoruz ki gradient görünsün
+                    child: Image.asset(
+                      backgroundImage,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Görsel bulunamazsa boş container
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            // Gradient overlay (görselin üzerine gradient ekliyoruz)
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    c1.withValues(alpha: 0.7),
+                    c2.withValues(alpha: 0.7),
+                  ],
+                ),
+              ),
+            ),
+            // İçerik
             Positioned(right: -8, bottom: -8, child: Icon(icon, size: 50, color: Colors.white.withValues(alpha: 0.15))),
             Padding(
               padding: const EdgeInsets.all(12.0),
