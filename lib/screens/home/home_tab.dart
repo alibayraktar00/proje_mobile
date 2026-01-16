@@ -85,7 +85,7 @@ class HomeTab extends ConsumerWidget {
                   hintText: "New Target ($unit)",
                   hintStyle: TextStyle(color: isDark ? Colors.white70 : Colors.blueGrey),
                   filled: true,
-                  fillColor: isDark ? Colors.blue.withOpacity(0.2) : Colors.blue[50],
+                  fillColor: isDark ? Colors.blue.withValues(alpha: 0.2) : Colors.blue[50],
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
               ),

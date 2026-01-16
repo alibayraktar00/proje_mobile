@@ -14,7 +14,7 @@ class _SupplementsTabState extends State<SupplementsTab> {
   final TextEditingController _searchController = TextEditingController();
   
   List<SupplementModel> _guideSupplements = [];
-  String _searchQuery = '';
+
 
   @override
   void initState() {
@@ -30,7 +30,6 @@ class _SupplementsTabState extends State<SupplementsTab> {
 
   void _onSearchChanged(String query) {
     setState(() {
-      _searchQuery = query;
       _guideSupplements = SupplementService.getAllSupplements().where((s) {
         return s.name.toLowerCase().contains(query.toLowerCase()) || 
                s.category.toLowerCase().contains(query.toLowerCase());
@@ -64,7 +63,7 @@ class _SupplementsTabState extends State<SupplementsTab> {
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
-                    shadows: [Shadow(color: Colors.black.withOpacity(0.5), blurRadius: 8)]
+                    shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 8)]
                   ),
                 ),
                 background: Stack(
@@ -81,7 +80,7 @@ class _SupplementsTabState extends State<SupplementsTab> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.7),
+                            Colors.black.withValues(alpha: 0.7),
                           ],
                         ),
                       ),
@@ -138,7 +137,7 @@ class _SupplementsTabState extends State<SupplementsTab> {
              color: theme.cardColor,
              borderRadius: BorderRadius.circular(16),
              boxShadow: [
-                 BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 4))
+                 BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 4))
              ]
            ),
            child: Material(

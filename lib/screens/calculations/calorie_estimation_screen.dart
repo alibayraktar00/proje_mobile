@@ -19,13 +19,11 @@ class _CalorieEstimationScreenState extends State<CalorieEstimationScreen> {
   String _activityType = 'running';
   double? _estimatedCalories;
   double? _bmr;
-  double? _dailyCalorieNeeds;
 
   @override
   void initState() {
     super.initState();
     _calculateBMR();
-    _calculateDailyCalorieNeeds();
     _estimateCalories();
   }
 
@@ -42,16 +40,7 @@ class _CalorieEstimationScreenState extends State<CalorieEstimationScreen> {
     }
   }
 
-  void _calculateDailyCalorieNeeds() {
-    if (_bmr != null) {
-      setState(() {
-        _dailyCalorieNeeds = CalculationService.calculateDailyCalorieNeeds(
-          bmr: _bmr!,
-          activityLevel: 'moderate', // Default to moderate
-        );
-      });
-    }
-  }
+
 
   void _estimateCalories() {
     setState(() {
@@ -68,7 +57,6 @@ class _CalorieEstimationScreenState extends State<CalorieEstimationScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = Colors.orange;
 
     return Scaffold(
       extendBodyBehindAppBar: true,

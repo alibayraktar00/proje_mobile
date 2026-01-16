@@ -12,13 +12,13 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ayarlar'),
+        title: const Text('Settings'),
         elevation: 0,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Tema Seçimi Bölümü
+          // Theme Selection Section
           Card(
             elevation: 2,
             shape: RoundedRectangleBorder(
@@ -37,7 +37,7 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Tema',
+                        'Theme',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -47,7 +47,7 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                   _buildThemeOption(
                     context: context,
-                    title: 'Açık Tema',
+                    title: 'Light Theme',
                     icon: Icons.light_mode,
                     themeMode: ThemeMode.light,
                     currentTheme: themeMode,
@@ -58,23 +58,12 @@ class SettingsScreen extends ConsumerWidget {
                   const Divider(height: 24),
                   _buildThemeOption(
                     context: context,
-                    title: 'Koyu Tema',
+                    title: 'Dark Theme',
                     icon: Icons.dark_mode,
                     themeMode: ThemeMode.dark,
                     currentTheme: themeMode,
                     onTap: () async {
                       await themeNotifier.setTheme(ThemeMode.dark);
-                    },
-                  ),
-                  const Divider(height: 24),
-                  _buildThemeOption(
-                    context: context,
-                    title: 'Sistem Teması',
-                    icon: Icons.brightness_auto,
-                    themeMode: ThemeMode.system,
-                    currentTheme: themeMode,
-                    onTap: () async {
-                      await themeNotifier.setTheme(ThemeMode.system);
                     },
                   ),
                 ],

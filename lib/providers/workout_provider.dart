@@ -41,7 +41,7 @@ class WorkoutNotifier extends StateNotifier<WorkoutState> {
       // Ensure loading is false on error
       state = state.copyWith(isLoading: false);
       // Optional: Store error in state if needed
-      print("Error loading logs: $e");
+      // print("Error loading logs: $e");
     }
   }
 

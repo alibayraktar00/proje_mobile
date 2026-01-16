@@ -127,7 +127,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: Colors.grey.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -218,7 +218,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: isSelected ? Colors.cyanAccent : Colors.grey.withOpacity(0.2),
+                  color: isSelected ? Colors.cyanAccent : Colors.grey.withValues(alpha: 0.2),
                 ),
               ),
             );
@@ -260,7 +260,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                         : Container(
                             width: 80,
                             height: 80,
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha: 0.1),
                             child: const Icon(Icons.fitness_center),
                           ),
                   ),
@@ -391,7 +391,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.cyanAccent.withOpacity(0.05),
+                        Colors.cyanAccent.withValues(alpha: 0.05),
                         Theme.of(context).scaffoldBackgroundColor,
                       ],
                       begin: Alignment.topCenter,
@@ -520,7 +520,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey.withOpacity(0.5)),
+            Icon(Icons.search_off, size: 64, color: Colors.grey.withValues(alpha: 0.5)),
             const SizedBox(height: 16),
             const Text(
               "No exercises found.",
@@ -561,7 +561,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -584,12 +584,12 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                               imageUrl: item.imageUrl!,
                               fit: BoxFit.cover,
                               errorWidget: (c, e, s) => Container(
-                                color: Colors.grey.withOpacity(0.1),
+                                color: Colors.grey.withValues(alpha: 0.1),
                                 child: const Icon(Icons.broken_image, color: Colors.grey),
                               ),
                             )
                           : Container(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Colors.grey.withValues(alpha: 0.1),
                               child: const Icon(Icons.fitness_center, color: Colors.grey),
                             ),
                     ),
@@ -606,7 +606,7 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
                           shape: BoxShape.circle,
                           boxShadow: [
                              BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 4,
                             ),
                           ],
@@ -667,9 +667,9 @@ class _ExercisesTabState extends ConsumerState<ExercisesTab> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Text(
           text,

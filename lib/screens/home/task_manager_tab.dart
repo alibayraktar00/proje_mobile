@@ -38,8 +38,8 @@ class TaskManagerTab extends ConsumerWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: isDark 
-                        ? [Colors.blueGrey.withOpacity(0.2), Colors.transparent]
-                        : [Colors.blue.withOpacity(0.05), Colors.transparent],
+                        ? [Colors.blueGrey.withValues(alpha: 0.2), Colors.transparent]
+                        : [Colors.blue.withValues(alpha: 0.05), Colors.transparent],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -54,7 +54,7 @@ class TaskManagerTab extends ConsumerWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -96,13 +96,13 @@ class TaskManagerTab extends ConsumerWidget {
                          color: isSelected ? theme.colorScheme.primary : theme.cardColor,
                          borderRadius: BorderRadius.circular(24),
                          border: Border.all(
-                           color: isSelected ? Colors.transparent : theme.dividerColor.withOpacity(0.1),
+                           color: isSelected ? Colors.transparent : theme.dividerColor.withValues(alpha: 0.1),
                            width: 1,
                          ),
                          boxShadow: [
                            if (isSelected)
                              BoxShadow(
-                               color: theme.colorScheme.primary.withOpacity(0.3),
+                               color: theme.colorScheme.primary.withValues(alpha: 0.3),
                                blurRadius: 8,
                                offset: const Offset(0, 4),
                              )
@@ -115,7 +115,7 @@ class TaskManagerTab extends ConsumerWidget {
                              DateFormat('EEE').format(date),
                              style: TextStyle(
                                fontSize: 13,
-                               color: isSelected ? Colors.white.withOpacity(0.8) : theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                               color: isSelected ? Colors.white.withValues(alpha: 0.8) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                                fontWeight: FontWeight.w500,
                              ),
                            ),
@@ -148,7 +148,7 @@ class TaskManagerTab extends ConsumerWidget {
                     Text(
                       "${logs.length} Exercises", 
                       style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), 
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6), 
                         fontWeight: FontWeight.w600
                       )
                     ),
@@ -176,10 +176,10 @@ class TaskManagerTab extends ConsumerWidget {
                    Container(
                      padding: const EdgeInsets.all(24),
                      decoration: BoxDecoration(
-                       color: theme.colorScheme.primary.withOpacity(0.05),
+                       color: theme.colorScheme.primary.withValues(alpha: 0.05),
                        shape: BoxShape.circle,
                      ),
-                     child: Icon(Icons.fitness_center_rounded, size: 48, color: theme.colorScheme.primary.withOpacity(0.5)),
+                     child: Icon(Icons.fitness_center_rounded, size: 48, color: theme.colorScheme.primary.withValues(alpha: 0.5)),
                    ),
                    const SizedBox(height: 16),
                    Text(
@@ -189,7 +189,7 @@ class TaskManagerTab extends ConsumerWidget {
                    const SizedBox(height: 8),
                    Text(
                      "No exercises for this date.",
-                     style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 14),
+                     style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5), fontSize: 14),
                    ),
                  ],
                ),
@@ -239,7 +239,7 @@ class TaskManagerTab extends ConsumerWidget {
       background: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.redAccent.withOpacity(0.9),
+          color: Colors.redAccent.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(20)
         ),
         alignment: Alignment.centerRight,
@@ -253,13 +253,13 @@ class TaskManagerTab extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
              BoxShadow(
-               color: Colors.black.withOpacity(0.04), 
+               color: Colors.black.withValues(alpha: 0.04), 
                blurRadius: 10, 
                offset: const Offset(0, 4)
              )
           ],
           border: Border.all(
-            color: isCompleted ? Colors.green.withOpacity(0.3) : Colors.transparent,
+            color: isCompleted ? Colors.green.withValues(alpha: 0.3) : Colors.transparent,
             width: 1.5
           )
         ),
@@ -306,7 +306,7 @@ class TaskManagerTab extends ConsumerWidget {
                             decoration: isCompleted ? TextDecoration.lineThrough : null,
                             decorationColor: theme.textTheme.bodyMedium?.color,
                             color: isCompleted 
-                                ? theme.textTheme.bodyMedium?.color?.withOpacity(0.5) 
+                                ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5) 
                                 : theme.textTheme.bodyLarge?.color,
                           ),
                         ),
@@ -334,9 +334,9 @@ class TaskManagerTab extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1), 
+        color: color.withValues(alpha: 0.1), 
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2))
+        border: Border.all(color: color.withValues(alpha: 0.2))
       ),
       child: Text(
         text, 
